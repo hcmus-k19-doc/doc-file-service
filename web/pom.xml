@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>web</artifactId>
+  <artifactId>doc-file-service-web</artifactId>
   <packaging>jar</packaging>
 
   <properties>
@@ -25,12 +25,12 @@
   <dependencies>
     <dependency>
       <groupId>edu.hcmus.doc.file-service</groupId>
-      <artifactId>common</artifactId>
+      <artifactId>doc-file-service-common</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>edu.hcmus.doc.file-service</groupId>
-      <artifactId>service</artifactId>
+      <artifactId>doc-file-service-service</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
 

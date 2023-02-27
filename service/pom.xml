@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>service</artifactId>
+  <artifactId>doc-file-service-service</artifactId>
   <packaging>jar</packaging>
 
   <properties>
