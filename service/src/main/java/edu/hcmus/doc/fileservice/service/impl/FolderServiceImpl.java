@@ -23,7 +23,7 @@ public class FolderServiceImpl implements FolderService {
   private final NodesApi nodesApi;
 
   @Override
-  public String createFolder(FolderDto folderDto) {
+  public Node createFolder(FolderDto folderDto) {
     SiteContainer docLibContainer = Objects.requireNonNull(
         sitesApi.getSiteContainer(folderDto.getSiteId(),
             "documentLibrary", null).getBody()).getEntry();
@@ -41,7 +41,7 @@ public class FolderServiceImpl implements FolderService {
             .name(folderDto.getTitle()),
         null, null, null, null, null).getBody()).getEntry();
 
-    return folderNode.getId();
+    return folderNode;
   }
 
   @Override

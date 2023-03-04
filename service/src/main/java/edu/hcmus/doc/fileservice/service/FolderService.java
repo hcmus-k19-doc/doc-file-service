@@ -7,5 +7,5 @@ public interface FolderService {
   // get folder by id
   Node getFolderById(String folderId);
 
-  String createFolder(FolderDto folderDto);
+  Node createFolder(FolderDto folderDto);
 }
