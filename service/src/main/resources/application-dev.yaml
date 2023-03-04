@@ -5,5 +5,22 @@ spring:
         jwt:
           issuer-uri: http://host.docker.internal:8180/realms/doc-realm
 
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
 server:
   port: 8081
+
+# HTTP Basic Authentication that will be used by the API
+content:
+  service:
+    security:
+      basicAuth:
+        username: admin
+        password: admin
+    # Location of the server and API endpoints
+    url: http://localhost:8080
+    path: /alfresco/api/-default-/public/alfresco/versions/1
+    search:
+      path: /alfresco/api/-default-/public/search/versions/1
