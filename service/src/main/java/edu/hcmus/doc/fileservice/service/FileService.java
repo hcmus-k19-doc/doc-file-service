@@ -7,15 +7,11 @@ import org.alfresco.core.model.Node;
 import org.alfresco.core.model.Site;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {
 
   List<String> getFileTitles();
 
-
-
-
-   Node uploadFile(FileDto fileDto);
-
-
+  Node uploadFile(MultipartFile multipartFile, String parentFolderId);
 }

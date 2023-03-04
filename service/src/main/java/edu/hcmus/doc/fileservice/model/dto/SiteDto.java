@@ -1,6 +1,5 @@
 package edu.hcmus.doc.fileservice.model.dto;
 
-import edu.hcmus.doc.fileservice.model.enums.SiteVisibility;
 import lombok.Data;
 import org.alfresco.core.model.SiteBodyCreate.VisibilityEnum;
 

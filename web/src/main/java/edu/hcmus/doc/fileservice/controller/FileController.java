@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import edu.hcmus.doc.fileservice.service.FileService;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,7 +28,8 @@ public class FileController {
   }
 
   @PostMapping
-  public Node uploadFile(@RequestBody FileDto fileDto) {
-    return fileService.uploadFile(fileDto);
+  public Node uploadFile(@RequestParam("file") MultipartFile multipartFile,
+      @RequestParam("parentFolderId") String parentFolderId) {
+    return fileService.uploadFile(multipartFile, parentFolderId);
   }
 }

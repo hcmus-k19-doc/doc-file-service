@@ -5,6 +5,8 @@ import edu.hcmus.doc.fileservice.model.dto.FolderDto;
 import edu.hcmus.doc.fileservice.service.FolderService;
 import lombok.RequiredArgsConstructor;
 import org.alfresco.core.model.Node;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class FolderController {
 
   private final FolderService folderService;
+
+  @GetMapping("/{folderId}")
+  public Node getFolderById(@PathVariable String folderId) {
+    return folderService.getFolderById(folderId);
+  }
 
   @PostMapping
   public Node createFolder(@RequestBody FolderDto folderDto) {
