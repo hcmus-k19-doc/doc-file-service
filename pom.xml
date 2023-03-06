@@ -57,26 +57,6 @@
       <version>5.1.0</version>
     </dependency>
 
-<!--    &lt;!&ndash; ACS Java REST APIs &ndash;&gt;-->
-<!--    <dependency>-->
-<!--      <groupId>org.alfresco</groupId>-->
-<!--      <artifactId>alfresco-acs-java-rest-api-spring-boot-starter</artifactId>-->
-<!--      <version>5.2.1</version>-->
-<!--    </dependency>-->
-
-<!--    &lt;!&ndash; APA Java REST APIs &ndash;&gt;-->
-<!--    <dependency>-->
-<!--      <groupId>org.alfresco</groupId>-->
-<!--      <artifactId>alfresco-apa-java-rest-api-spring-boot-starter</artifactId>-->
-<!--      <version>5.2.1</version>-->
-<!--    </dependency>-->
-
-<!--    &lt;!&ndash; Java Event API &ndash;&gt;-->
-<!--    <dependency>-->
-<!--      <groupId>org.alfresco</groupId>-->
-<!--      <artifactId>alfresco-java-event-api-spring-boot-starter</artifactId>-->
-<!--      <version>5.2.1</version>-->
-<!--    </dependency>-->
 
     <!--    Utils dependencies    -->
     <dependency>
@@ -85,6 +65,7 @@
       <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
+
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
