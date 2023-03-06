@@ -10,6 +10,11 @@ import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.handler.SitesApi;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
+import org.alfresco.search.handler.SearchApi;
+import org.alfresco.search.model.RequestQuery;
+import org.alfresco.search.model.ResultSetPaging;
+import org.alfresco.search.model.SearchRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +24,8 @@ public class FileServiceImpl implements FileService {
 
   private final SitesApi sitesApi;
   private final NodesApi nodesApi;
+
+  private final SearchApi searchApi;
 
   @Override
   public List<String> getFileTitles() {
@@ -31,6 +38,10 @@ public class FileServiceImpl implements FileService {
   public Node uploadFile(MultipartFile multipartFile, String parentFolderId) {
     Node parentFolderNode = Objects.requireNonNull(nodesApi.getNode(parentFolderId, null, null,
         null).getBody()).getEntry();
+
+    // check if file already exists
+
+
 
     // Create the file node metadata
     Node fileNode = Objects.requireNonNull(nodesApi.createNode(parentFolderNode.getId(),
