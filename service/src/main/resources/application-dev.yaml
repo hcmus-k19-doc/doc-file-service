@@ -5,5 +5,40 @@ spring:
         jwt:
           issuer-uri: http://host.docker.internal:8180/realms/doc-realm
 
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+  servlet:
+    multipart:
+      max-file-size: 500KB # max file size for each request
+      max-request-size: 500KB # max request size for a multipart/form-data.
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/alfresco
+    username: alfresco
+    password: alfresco
+
+  jms:
+    cache:
+      enabled: false
+
+  activemq:
+    broker-url: tcp://localhost:61616
+
+
 server:
   port: 8081
+
+# HTTP Basic Authentication that will be used by the API
+content:
+  service:
+    security:
+      basicAuth:
+        username: admin
+        password: admin
+    # Location of the server and API endpoints
+    url: http://localhost:8080
+    path: /alfresco/api/-default-/public/alfresco/versions/1
+    search:
+      path: /alfresco/api/-default-/public/search/versions/1
