@@ -1,7 +1,5 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
-import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
-
 import edu.hcmus.doc.fileservice.model.dto.IncomingDocumentCriteriaDto;
 import edu.hcmus.doc.fileservice.model.entity.IncomingDocument;
 import edu.hcmus.doc.fileservice.repository.IncomingDocumentRepository;
@@ -9,10 +7,7 @@ import edu.hcmus.doc.fileservice.service.IncomingDocumentService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,24 +15,37 @@ import org.springframework.stereotype.Service;
 public class IncomingDocumentServiceImpl implements IncomingDocumentService {
   private final IncomingDocumentRepository incomingDocumentRepository;
 
-  private final ElasticsearchOperations operations;
-
-
   @Override
   public List<IncomingDocument> getIncomingDocuments(IncomingDocumentCriteriaDto incomingDocumentCriteriaDto) {
-//    var query = new NativeSearchQueryBuilder()
-//        .withQuery(queryStringQuery("incoming_number:" + incomingDocumentCriteriaDto.getIncomingNumber()))
-//        .build();
-//
-//
-//    SearchHits<IncomingDocument> incomingDocumentHits = operations.search(query, IncomingDocument.class, IndexCoordinates.of("logstash-incoming-document-index"));
-//
-//    List<IncomingDocument> incomingDocumentMatches = new ArrayList<>();
-//    incomingDocumentHits.forEach(searchHit->{
-//      incomingDocumentMatches.add(searchHit.getContent());
-//    });
-//    return incomingDocumentMatches;
-    return incomingDocumentRepository.findByIncomingNumberOrOriginalSymbolNumberOrSummary(incomingDocumentCriteriaDto.getIncomingNumber(), incomingDocumentCriteriaDto.getOriginalSymbolNumber(), incomingDocumentCriteriaDto.getSummary());
+    if(incomingDocumentCriteriaDto != null) {
+      if(StringUtils.isNotBlank(incomingDocumentCriteriaDto.getIncomingNumber()) && StringUtils.isNotBlank(incomingDocumentCriteriaDto.getOriginalSymbolNumber()) && StringUtils.isNotBlank(incomingDocumentCriteriaDto.getSummary())) {
+        return incomingDocumentRepository.findByIncomingNumberAndOriginalSymbolNumberAndSummary(incomingDocumentCriteriaDto.getIncomingNumber(), incomingDocumentCriteriaDto.getOriginalSymbolNumber(), incomingDocumentCriteriaDto.getSummary());
+      } else {
+        if(StringUtils.isNotBlank(incomingDocumentCriteriaDto.getIncomingNumber()) && StringUtils.isNotBlank(incomingDocumentCriteriaDto.getOriginalSymbolNumber())) {
+          return incomingDocumentRepository.findByIncomingNumberAndOriginalSymbolNumber(incomingDocumentCriteriaDto.getIncomingNumber(), incomingDocumentCriteriaDto.getOriginalSymbolNumber());
+        } else {
+          if(StringUtils.isNotBlank(incomingDocumentCriteriaDto.getIncomingNumber()) && StringUtils.isNotBlank(incomingDocumentCriteriaDto.getSummary())) {
+            return incomingDocumentRepository.findByIncomingNumberAndSummary(incomingDocumentCriteriaDto.getIncomingNumber(), incomingDocumentCriteriaDto.getSummary());
+          } else {
+            if(StringUtils.isNotBlank(incomingDocumentCriteriaDto.getOriginalSymbolNumber()) && StringUtils.isNotBlank(incomingDocumentCriteriaDto.getSummary())) {
+              return incomingDocumentRepository.findByOriginalSymbolNumberAndSummary(incomingDocumentCriteriaDto.getOriginalSymbolNumber(), incomingDocumentCriteriaDto.getSummary());
+            } else {
+              if(StringUtils.isNotBlank(incomingDocumentCriteriaDto.getIncomingNumber())) {
+                return incomingDocumentRepository.findByIncomingNumber(incomingDocumentCriteriaDto.getIncomingNumber());
+              } else {
+                if(StringUtils.isNotBlank(incomingDocumentCriteriaDto.getOriginalSymbolNumber())) {
+                  return incomingDocumentRepository.findByOriginalSymbolNumber(incomingDocumentCriteriaDto.getOriginalSymbolNumber());
+                } else {
+                  return incomingDocumentRepository.findBySummary(incomingDocumentCriteriaDto.getSummary());
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return new ArrayList<>();
   }
 
 
