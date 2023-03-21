@@ -26,6 +26,12 @@ spring:
   activemq:
     broker-url: tcp://localhost:61616
 
+  elasticsearch:
+    uris: localhost:9200
+    username: elastic
+    password: changeme
+    connection-timeout: 1s
+
 
 server:
   port: 8081
