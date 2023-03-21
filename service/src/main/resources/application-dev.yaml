@@ -14,6 +14,25 @@ spring:
       max-file-size: 500KB # max file size for each request
       max-request-size: 500KB # max request size for a multipart/form-data.
 
+  datasource:
+    url: jdbc:postgresql://localhost:5432/alfresco
+    username: alfresco
+    password: alfresco
+
+  jms:
+    cache:
+      enabled: false
+
+  activemq:
+    broker-url: tcp://localhost:61616
+
+  elasticsearch:
+    uris: localhost:9200
+    username: elastic
+    password: changeme
+    connection-timeout: 1s
+
+
 server:
   port: 8081
 

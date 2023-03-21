@@ -18,10 +18,31 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>alfresco-public</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+    </dependency>
+
+    <!--    Alfresco starter dependencies    -->
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-java-rest-api-spring-boot-starter</artifactId>
+      <version>5.1.0</version>
+    </dependency>
+
+    <!--    Spring Data Elasticsearch    -->
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-elasticsearch</artifactId>
+      <version>4.0.0.RELEASE</version>
     </dependency>
   </dependencies>
 
