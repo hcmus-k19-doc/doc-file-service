@@ -25,7 +25,7 @@ content:
         username: admin
         password: admin
     # Location of the server and API endpoints
-    url: http://localhost:8080
+    url: http://localhost:8181
     path: /alfresco/api/-default-/public/alfresco/versions/1
     search:
       path: /alfresco/api/-default-/public/search/versions/1

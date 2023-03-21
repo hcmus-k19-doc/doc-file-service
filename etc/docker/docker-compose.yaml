@@ -22,7 +22,7 @@ services:
     image: docker.io/alfresco/alfresco-content-repository-community:7.4.0-M2
     mem_limit: 1900m
     ports:
-      - "8080:8080"
+      - "8181:8080"
     environment:
       JAVA_TOOL_OPTIONS: >-
         -Dencryption.keystore.type=JCEKS
@@ -39,9 +39,9 @@ services:
         -Dsolr.host=solr6 -Dsolr.port=8983 -Dsolr.http.connection.timeout=1000
         -Dsolr.secureComms=secret -Dsolr.sharedSecret=secret
         -Dsolr.base.url=/solr -Dindex.subsystem.name=solr6
-        -Dshare.host=127.0.0.1 -Dshare.port=8080 -Dalfresco.host=localhost
-        -Dalfresco.port=8080 -Dcsrf.filter.enabled=false
-        -Daos.baseUrlOverwrite=http://localhost:8080/alfresco/aos
+        -Dshare.host=127.0.0.1 -Dshare.port=8182 -Dalfresco.host=localhost
+        -Dalfresco.port=8181 -Dcsrf.filter.enabled=false
+        -Daos.baseUrlOverwrite=http://localhost:8181/alfresco/aos
         -Dmessaging.broker.url="failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true"
         -Ddeployment.method=DOCKER_COMPOSE
         -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
@@ -55,7 +55,7 @@ services:
       - POSTGRES_DB=alfresco
     command: postgres -c max_connections=300 -c log_min_messages=LOG
     ports:
-      - "5432:5432"
+      - "5433:5432"
   solr6:
     image: alfresco/alfresco-search-services:2.0.5
     mem_limit: 2g
