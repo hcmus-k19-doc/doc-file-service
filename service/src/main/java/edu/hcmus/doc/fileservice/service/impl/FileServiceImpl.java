@@ -2,6 +2,7 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import edu.hcmus.doc.fileservice.service.FileService;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -11,10 +12,7 @@ import org.alfresco.core.handler.SitesApi;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
 import org.alfresco.search.handler.SearchApi;
-import org.alfresco.search.model.RequestQuery;
-import org.alfresco.search.model.ResultSetPaging;
-import org.alfresco.search.model.SearchRequest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,8 +39,6 @@ public class FileServiceImpl implements FileService {
 
     // check if file already exists
 
-
-
     // Create the file node metadata
     Node fileNode = Objects.requireNonNull(nodesApi.createNode(parentFolderNode.getId(),
         new NodeBodyCreate().nodeType("cm:content").name(multipartFile.getOriginalFilename()),
@@ -59,5 +55,24 @@ public class FileServiceImpl implements FileService {
     }
 
     return updatedFileNode;
+  }
+
+  @Override
+  public byte[] downloadFile(String fileId) {
+    // Relevant when using API call from web browser, true is the default
+    Boolean attachment = true;
+    // Only download if modified since this time, optional
+    OffsetDateTime ifModifiedSince = null;
+    // The Range header indicates the part of a document that the server should return.
+    // Single part request supported, for example: bytes=1-10., optional
+    String range = null;
+
+    Resource content = nodesApi.getNodeContent(fileId, attachment, ifModifiedSince, range).getBody();
+    try {
+      byte[] bytes = content.getInputStream().readAllBytes();
+      return bytes;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
