@@ -5,6 +5,8 @@ import edu.hcmus.doc.fileservice.model.dto.FolderDto;
 import edu.hcmus.doc.fileservice.service.FolderService;
 import lombok.RequiredArgsConstructor;
 import org.alfresco.core.model.Node;
+import org.alfresco.core.model.NodeChildAssociationPagingList;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,11 @@ public class FolderController {
   @GetMapping("/{folderId}")
   public Node getFolderById(@PathVariable String folderId) {
     return folderService.getFolderById(folderId);
+  }
+
+  @GetMapping("/content/{folderId}")
+  public ResponseEntity<NodeChildAssociationPagingList> getFolderContent(@PathVariable String folderId) {
+    return ResponseEntity.ok(folderService.getFolderContent(folderId));
   }
 
   @PostMapping
