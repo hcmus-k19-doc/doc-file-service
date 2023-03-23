@@ -1,6 +1,9 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
+import static edu.hcmus.doc.fileservice.common.Constants.ALLOWED_FILE_TYPES;
+
 import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
+import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.service.FolderService;
 import java.io.IOException;
@@ -15,11 +18,7 @@ import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
 import org.alfresco.core.model.NodeChildAssociationEntry;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
-import org.alfresco.core.model.NodeEntry;
-import org.alfresco.core.model.NodePagingList;
 import org.alfresco.search.handler.SearchApi;
-import org.alfresco.search.model.RequestQuery;
-import org.alfresco.search.model.SearchRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +40,19 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
+  public Boolean isValidFile(String fileName, String fileExtension, String parentFolderId) {
+    // check if file already exists
+    if (isFileExist(fileName, parentFolderId)) {
+      throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
+    }
+    // check if file type is allowed
+    if (ALLOWED_FILE_TYPES.contains(fileExtension)) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
   public Boolean isFileExist(String fileName, String parentFolderId) {
     NodeChildAssociationPagingList folderContent = folderService.getFolderContent(parentFolderId);
     if (folderContent.getEntries().size() > 0) {
@@ -55,13 +67,18 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Node uploadFile(MultipartFile multipartFile, String parentFolderId) {
-    Node parentFolderNode = Objects.requireNonNull(nodesApi.getNode(parentFolderId, null, null,
-        null).getBody()).getEntry();
-
     // check if file already exists
     if (isFileExist(multipartFile.getOriginalFilename(), parentFolderId)) {
       throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
     }
+
+    // check if file type is allowed
+    if (!ALLOWED_FILE_TYPES.contains(multipartFile.getContentType().split("/")[1].toLowerCase())) {
+      throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
+    }
+
+    Node parentFolderNode = Objects.requireNonNull(nodesApi.getNode(parentFolderId, null, null,
+        null).getBody()).getEntry();
 
     // Create the file node metadata
     Node fileNode = Objects.requireNonNull(nodesApi.createNode(parentFolderNode.getId(),
@@ -91,7 +108,8 @@ public class FileServiceImpl implements FileService {
     // Single part request supported, for example: bytes=1-10., optional
     String range = null;
 
-    Resource content = nodesApi.getNodeContent(fileId, attachment, ifModifiedSince, range).getBody();
+    Resource content = nodesApi.getNodeContent(fileId, attachment, ifModifiedSince, range)
+        .getBody();
     try {
       byte[] bytes = content.getInputStream().readAllBytes();
       return bytes;
