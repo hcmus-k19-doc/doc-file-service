@@ -11,8 +11,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 500KB # max file size for each request
-      max-request-size: 500KB # max request size for a multipart/form-data.
+      max-file-size: 3000KB # max file size for each request
+      max-request-size: 3000KB # max request size for a multipart/form-data.
 
   datasource:
     url: jdbc:postgresql://localhost:5432/alfresco
