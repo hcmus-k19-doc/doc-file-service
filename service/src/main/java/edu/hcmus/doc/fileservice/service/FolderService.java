@@ -6,7 +6,6 @@ import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
 
 public interface FolderService {
-  // get folder by id
   Node getFolderById(String folderId);
 
   List<Node> getFoldersBySiteId(String siteId);

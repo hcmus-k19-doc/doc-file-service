@@ -1,6 +1,8 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
+import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.service.FileService;
+import edu.hcmus.doc.fileservice.service.FolderService;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -11,7 +13,13 @@ import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.handler.SitesApi;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
+import org.alfresco.core.model.NodeChildAssociationEntry;
+import org.alfresco.core.model.NodeChildAssociationPagingList;
+import org.alfresco.core.model.NodeEntry;
+import org.alfresco.core.model.NodePagingList;
 import org.alfresco.search.handler.SearchApi;
+import org.alfresco.search.model.RequestQuery;
+import org.alfresco.search.model.SearchRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,12 +33,25 @@ public class FileServiceImpl implements FileService {
 
   private final SearchApi searchApi;
 
+  private final FolderService folderService;
+
   @Override
   public List<String> getFileTitles() {
     return Collections.emptyList();
   }
 
-
+  @Override
+  public Boolean isFileExist(String fileName, String parentFolderId) {
+    NodeChildAssociationPagingList folderContent = folderService.getFolderContent(parentFolderId);
+    if (folderContent.getEntries().size() > 0) {
+      for (NodeChildAssociationEntry nodeEntry : folderContent.getEntries()) {
+        if (nodeEntry.getEntry().getName().equals(fileName)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   @Override
   public Node uploadFile(MultipartFile multipartFile, String parentFolderId) {
@@ -38,6 +59,9 @@ public class FileServiceImpl implements FileService {
         null).getBody()).getEntry();
 
     // check if file already exists
+    if (isFileExist(multipartFile.getOriginalFilename(), parentFolderId)) {
+      throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
+    }
 
     // Create the file node metadata
     Node fileNode = Objects.requireNonNull(nodesApi.createNode(parentFolderNode.getId(),

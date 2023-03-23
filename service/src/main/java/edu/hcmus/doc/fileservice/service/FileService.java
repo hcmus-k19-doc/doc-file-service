@@ -6,6 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {
 
+  Boolean isFileExist(String fileName, String parentFolderId);
+
   List<String> getFileTitles();
 
   Node uploadFile(MultipartFile multipartFile, String parentFolderId);
