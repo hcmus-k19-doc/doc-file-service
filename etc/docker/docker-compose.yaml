@@ -37,9 +37,9 @@ services:
         -Dsolr.host=solr6 -Dsolr.port=8983 -Dsolr.http.connection.timeout=1000
         -Dsolr.secureComms=secret -Dsolr.sharedSecret=secret
         -Dsolr.base.url=/solr -Dindex.subsystem.name=solr6
-        -Dshare.host=127.0.0.1 -Dshare.port=8080 -Dalfresco.host=localhost
-        -Dalfresco.port=8080 -Dcsrf.filter.enabled=false
-        -Daos.baseUrlOverwrite=http://localhost:8080/alfresco/aos
+        -Dshare.host=127.0.0.1 -Dshare.port=8182 -Dalfresco.host=localhost
+        -Dalfresco.port=8181 -Dcsrf.filter.enabled=false
+        -Daos.baseUrlOverwrite=http://localhost:8181/alfresco/aos
         -Dmessaging.broker.url="failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true"
         -Ddeployment.method=DOCKER_COMPOSE
         -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
@@ -59,8 +59,10 @@ services:
       REPO_PORT: "8080"
       JAVA_OPTS: >-
         -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
-        -Dalfresco.host=localhost -Dalfresco.port=8080
+        -Dalfresco.host=localhost -Dalfresco.port=8181
         -Dalfresco.context=alfresco -Dalfresco.protocol=http
+    ports:
+      - "8182:8080"
   postgres:
     image: postgres:14.4
     mem_limit: 512m
@@ -70,7 +72,7 @@ services:
       - POSTGRES_DB=alfresco
     command: postgres -c max_connections=300 -c log_min_messages=LOG
     ports:
-      - "5432:5432"
+      - "5433:5432"
   solr6:
     image: alfresco/alfresco-search-services:2.0.5
     mem_limit: 2g
@@ -102,7 +104,7 @@ services:
     image: alfresco/alfresco-content-app:3.1.0
     mem_limit: 128m
     environment:
-      APP_BASE_SHARE_URL: "http://localhost:8080/aca/#/preview/s"
+      APP_BASE_SHARE_URL: "http://localhost:8181/aca/#/preview/s"
   proxy:
     image: alfresco/alfresco-acs-nginx:3.4.2
     mem_limit: 128m
@@ -116,7 +118,7 @@ services:
       - alfresco
       - content-app
     ports:
-      - "8080:8080"
+      - "8181:8080"
     links:
       - content-app
       - alfresco

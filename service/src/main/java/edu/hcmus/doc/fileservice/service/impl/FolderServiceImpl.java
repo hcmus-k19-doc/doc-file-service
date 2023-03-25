@@ -11,6 +11,7 @@ import org.alfresco.core.handler.SitesApi;
 import org.alfresco.core.model.Definition;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
+import org.alfresco.core.model.NodeChildAssociationPagingList;
 import org.alfresco.core.model.Property;
 import org.alfresco.core.model.SiteContainer;
 import org.alfresco.search.handler.SearchApi;
@@ -62,5 +63,19 @@ public class FolderServiceImpl implements FolderService {
             "documentLibrary", null).getBody()).getEntry();
 
     return null;
+  }
+
+  @Override
+  public NodeChildAssociationPagingList getFolderContent(String folderId) {
+    Integer skipCount = 0;
+    Integer maxItems = 100;
+    List<String> include = null;
+    List<String> fields = null;
+    List<String> orderBy = null;
+    String where = null;
+    Boolean includeSource = false;
+
+    NodeChildAssociationPagingList result = nodesApi.listNodeChildren(folderId, skipCount, maxItems, orderBy, where, include,null, includeSource, fields).getBody().getList();
+    return result;
   }
 }
