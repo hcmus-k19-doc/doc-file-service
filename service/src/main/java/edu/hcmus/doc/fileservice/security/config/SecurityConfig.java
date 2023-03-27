@@ -23,8 +23,8 @@ public class SecurityConfig {
         .and()
         .authorizeRequests()
         .anyRequest()
-//        .authenticated()
-        .permitAll()
+        .authenticated()
+//        .permitAll()
         .and()
         .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 
