@@ -2,18 +2,30 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import edu.hcmus.doc.fileservice.model.dto.IncomingDocumentCriteriaDto;
 import edu.hcmus.doc.fileservice.model.entity.IncomingDocument;
+import edu.hcmus.doc.fileservice.model.entity.WrapperIncomingDocument;
 import edu.hcmus.doc.fileservice.repository.IncomingDocumentRepository;
 import edu.hcmus.doc.fileservice.service.IncomingDocumentService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class IncomingDocumentServiceImpl implements IncomingDocumentService {
   private final IncomingDocumentRepository incomingDocumentRepository;
+
+  @RabbitListener(queues = "${spring.rabbitmq.template.default-receive-queue}")
+  public List<IncomingDocument> receivedIncomingDocumentsSearchMessage(IncomingDocumentCriteriaDto incomingDocumentCriteriaDto) {
+    List<IncomingDocument> incomingDocuments = getIncomingDocuments(incomingDocumentCriteriaDto);
+    return incomingDocuments.stream()
+        .map(WrapperIncomingDocument::new)
+        .distinct()
+        .map(WrapperIncomingDocument::unwrap)
+        .toList();
+  }
 
   @Override
   public List<IncomingDocument> getIncomingDocuments(IncomingDocumentCriteriaDto incomingDocumentCriteriaDto) {
@@ -44,7 +56,6 @@ public class IncomingDocumentServiceImpl implements IncomingDocumentService {
         }
       }
     }
-
     return new ArrayList<>();
   }
 
