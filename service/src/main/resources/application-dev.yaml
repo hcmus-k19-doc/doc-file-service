@@ -32,6 +32,15 @@ spring:
     password: changeme
     connection-timeout: 1s
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    template:
+      exchange: doc.exchange
+      routing-key: doc.routingkey
+      default-receive-queue: doc.doc-main-queue
 
 server:
   port: 8081
