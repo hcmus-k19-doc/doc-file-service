@@ -1,6 +1,5 @@
 package edu.hcmus.doc.fileservice.model.dto;
 
-import java.io.Serializable;
 import lombok.Data;
 
 @Data

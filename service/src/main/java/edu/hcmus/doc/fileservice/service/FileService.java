@@ -5,7 +5,6 @@ import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import java.util.List;
 import org.alfresco.core.model.Node;
-import org.springframework.amqp.core.Message;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {

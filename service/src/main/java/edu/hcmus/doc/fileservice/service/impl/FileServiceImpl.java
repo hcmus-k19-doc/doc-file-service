@@ -22,11 +22,9 @@ import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
 import org.alfresco.core.model.NodeChildAssociationEntry;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.SerializationUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
@@ -135,11 +133,6 @@ public class FileServiceImpl implements FileService {
   @RabbitListener(queues = "${spring.rabbitmq.template.default-receive-queue}")
   @Override
   public List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto) {
-//    byte[] requestBytes = message.getBody();
-//
-//    Object deserialize = SerializationUtils.deserialize(requestBytes);
-//
-//    AttachmentPostDto attachmentPostDto = (AttachmentPostDto) deserialize;
 
     System.out.println("Received request from main service");
     // create folder for incoming document attachments

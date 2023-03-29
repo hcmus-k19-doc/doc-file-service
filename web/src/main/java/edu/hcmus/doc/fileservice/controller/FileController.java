@@ -1,8 +1,6 @@
 package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.DocURL;
-import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
-import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.service.FileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
