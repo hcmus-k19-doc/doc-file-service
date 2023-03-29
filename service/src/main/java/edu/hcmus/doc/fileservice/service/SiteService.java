@@ -8,4 +8,6 @@ public interface SiteService {
   Site createSite(SiteDto siteDto);
 
   Site getSiteBySiteId(String siteId);
+
+  void deleteSiteBySiteId(String siteId);
 }
