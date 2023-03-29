@@ -1,10 +1,10 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
 import edu.hcmus.doc.fileservice.model.dto.SiteDto;
+import edu.hcmus.doc.fileservice.model.exception.SiteNotFoundException;
 import edu.hcmus.doc.fileservice.service.SiteService;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.handler.SitesApi;
 import org.alfresco.core.model.Site;
 import org.alfresco.core.model.SiteBodyCreate;
@@ -26,5 +26,18 @@ public class SiteServiceImpl implements SiteService {
             .visibility(siteDto.getVisibility()),
         null, null, null).getBody()).getEntry();
     return site;
+  }
+
+  @Override
+  public Site getSiteBySiteId(String siteId) {
+    // Check if a site exists
+    try {
+      Site site = sitesApi.getSite(siteId, null, null).getBody().getEntry();
+      System.out.println("Site exists: " + siteId);
+      return site;
+    } catch (Exception e) {
+      System.out.println("Site does not exist: " + siteId);
+      throw new SiteNotFoundException(SiteNotFoundException.SITE_NOT_FOUND);
+    }
   }
 }

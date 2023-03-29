@@ -2,6 +2,7 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import static edu.hcmus.doc.fileservice.common.Constants.ALLOWED_FILE_TYPES;
 
+import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.FileService;
@@ -96,6 +97,12 @@ public class FileServiceImpl implements FileService {
     }
 
     return updatedFileNode;
+  }
+
+  @Override
+  public List<FileDto> saveAttachmentsByIncomingDocId(List<MultipartFile> multipartFiles,
+      String incomingDocId) {
+    return null;
   }
 
   @Override

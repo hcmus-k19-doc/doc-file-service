@@ -29,9 +29,18 @@ public class FolderServiceImpl implements FolderService {
 
   @Override
   public Node createFolder(FolderDto folderDto) {
+    // create site if not exist
+
+
     SiteContainer docLibContainer = Objects.requireNonNull(
         sitesApi.getSiteContainer(folderDto.getSiteId(),
             "documentLibrary", null).getBody()).getEntry();
+
+    if (docLibContainer == null) {
+      // create site
+      System.out.println("create site");
+      // create doc lib
+    }
 
     Property property = new Property();
     property.setTitle(folderDto.getTitle());

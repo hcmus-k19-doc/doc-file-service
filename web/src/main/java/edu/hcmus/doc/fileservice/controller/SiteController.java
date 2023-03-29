@@ -5,6 +5,8 @@ import edu.hcmus.doc.fileservice.model.dto.SiteDto;
 import edu.hcmus.doc.fileservice.service.SiteService;
 import lombok.RequiredArgsConstructor;
 import org.alfresco.core.model.Site;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,5 +21,10 @@ public class SiteController {
   @PostMapping
   public Site createSite(@RequestBody SiteDto siteDto) {
     return siteService.createSite(siteDto);
+  }
+
+  @GetMapping("/{siteId}")
+  public Site getSiteBySiteId(@PathVariable String siteId) {
+    return siteService.getSiteBySiteId(siteId);
   }
 }
