@@ -44,12 +44,12 @@ public class FileController {
         .body(fileContent);
   }
 
-  @PostMapping("/test/{incomingDocumentId}")
-  public List<FileDto> testSaveAttachments(@PathVariable String incomingDocumentId, @RequestParam("attachments") List<MultipartFile> attachments) {
-    AttachmentPostDto attachmentPostDto = new AttachmentPostDto();
-    attachmentPostDto.setIncomingDocId(Long.valueOf(incomingDocumentId));
-    attachmentPostDto.setAttachments(attachments);
-    return fileService.saveAttachmentsByIncomingDocId(attachmentPostDto);
-  }
+//  @PostMapping("/test/{incomingDocumentId}")
+//  public List<FileDto> testSaveAttachments(@PathVariable String incomingDocumentId, @RequestParam("attachments") List<MultipartFile> attachments) {
+//    AttachmentPostDto attachmentPostDto = new AttachmentPostDto();
+//    attachmentPostDto.setIncomingDocId(Long.valueOf(incomingDocumentId));
+//    attachmentPostDto.setAttachments(attachments);
+//    return fileService.saveAttachmentsByIncomingDocId(attachmentPostDto);
+//  }
 
 }
