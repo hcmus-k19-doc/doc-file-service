@@ -1,6 +1,7 @@
 package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.DocURL;
+import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.service.FileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,11 @@ public class FileController {
     return ResponseEntity.status(HttpStatus.OK)
         .contentType(MediaType.valueOf("application/pdf"))
         .body(fileContent);
+  }
+
+  @PostMapping("/test/{incomingDocumentId}")
+  public List<FileDto> testSaveAttachments(@PathVariable String incomingDocumentId, @RequestParam("attachments") List<MultipartFile> attachments) {
+    return fileService.saveAttachmentsByIncomingDocId(attachments, incomingDocumentId);
   }
 
 }

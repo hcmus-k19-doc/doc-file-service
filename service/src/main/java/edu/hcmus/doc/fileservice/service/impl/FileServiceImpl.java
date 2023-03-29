@@ -7,6 +7,7 @@ import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.service.FolderService;
+import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -15,12 +16,10 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.alfresco.core.handler.NodesApi;
-import org.alfresco.core.handler.SitesApi;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
 import org.alfresco.core.model.NodeChildAssociationEntry;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
-import org.alfresco.search.handler.SearchApi;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,12 +28,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileServiceImpl implements FileService {
 
-  private final SitesApi sitesApi;
   private final NodesApi nodesApi;
 
-  private final SearchApi searchApi;
-
   private final FolderService folderService;
+
+  private final FileMapper fileMapper;
 
   @Override
   public List<String> getFileTitles() {
@@ -111,6 +109,7 @@ public class FileServiceImpl implements FileService {
     List<FileDto> fileDtos = new ArrayList<>();
     for (MultipartFile multipartFile : multipartFiles) {
       Node file = uploadFile(multipartFile, folderId);
+      fileDtos.add(fileMapper.toDto(file));
     }
 
     return fileDtos;

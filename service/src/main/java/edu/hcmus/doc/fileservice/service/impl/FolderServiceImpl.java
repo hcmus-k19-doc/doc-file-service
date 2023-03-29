@@ -6,7 +6,6 @@ import edu.hcmus.doc.fileservice.model.exception.FolderNotFoundException;
 import edu.hcmus.doc.fileservice.model.exception.SiteNotFoundException;
 import edu.hcmus.doc.fileservice.service.FolderService;
 import edu.hcmus.doc.fileservice.service.SiteService;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -62,7 +61,8 @@ public class FolderServiceImpl implements FolderService {
 
     FolderDto folderDto = new FolderDto();
     folderDto.setSiteId(siteId);
-    folderDto.setTitle("ICD_" + incomingDocumentId + "_" + LocalDateTime.now());
+    folderDto.setTitle("ICD_" + incomingDocumentId);
+    folderDto.setDescription("Incoming document folder for ICD_" + incomingDocumentId);
 
     Node folder = createFolder(folderDto);
     return folder.getId();
