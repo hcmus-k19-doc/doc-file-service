@@ -1,7 +1,12 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
 import edu.hcmus.doc.fileservice.model.dto.FolderDto;
+import edu.hcmus.doc.fileservice.model.dto.SiteDto;
+import edu.hcmus.doc.fileservice.model.exception.FolderNotFoundException;
+import edu.hcmus.doc.fileservice.model.exception.SiteNotFoundException;
 import edu.hcmus.doc.fileservice.service.FolderService;
+import edu.hcmus.doc.fileservice.service.SiteService;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -13,8 +18,10 @@ import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
 import org.alfresco.core.model.Property;
+import org.alfresco.core.model.SiteBodyCreate.VisibilityEnum;
 import org.alfresco.core.model.SiteContainer;
 import org.alfresco.search.handler.SearchApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -27,20 +34,50 @@ public class FolderServiceImpl implements FolderService {
 
   private final SearchApi searchApi;
 
+  private final SiteService siteService;
+
+  @Value("${alfresco.default.siteId}")
+  private String siteId;
+
+  @Value("${alfresco.default.siteTitle}")
+  private String siteTitle;
+
+  @Value("${alfresco.default.siteDescription}")
+  private String siteDescription;
+
+  @Value("${alfresco.default.siteVisibility}")
+  private String siteVisibility;
+
+  @Override
+  public String createAttachmentFolderForIncomingDocument(String incomingDocumentId) {
+    if (!siteService.isSiteExisted(siteId)) {
+      SiteDto siteDto = new SiteDto();
+      siteDto.setId(siteId);
+      siteDto.setTitle(siteTitle);
+      siteDto.setDescription(siteDescription);
+      siteDto.setVisibility(VisibilityEnum.valueOf(siteVisibility));
+
+      siteService.createSite(siteDto);
+    }
+
+    FolderDto folderDto = new FolderDto();
+    folderDto.setSiteId(siteId);
+    folderDto.setTitle("ICD_" + incomingDocumentId + "_" + LocalDateTime.now());
+
+    Node folder = createFolder(folderDto);
+    return folder.getId();
+  }
+
   @Override
   public Node createFolder(FolderDto folderDto) {
-    // create site if not exist
 
+    if (!siteService.isSiteExisted(folderDto.getSiteId())) {
+      throw new SiteNotFoundException(SiteNotFoundException.SITE_NOT_FOUND);
+    }
 
     SiteContainer docLibContainer = Objects.requireNonNull(
         sitesApi.getSiteContainer(folderDto.getSiteId(),
             "documentLibrary", null).getBody()).getEntry();
-
-    if (docLibContainer == null) {
-      // create site
-      System.out.println("create site");
-      // create doc lib
-    }
 
     Property property = new Property();
     property.setTitle(folderDto.getTitle());
@@ -60,9 +97,13 @@ public class FolderServiceImpl implements FolderService {
   }
 
   @Override
-  public Node getFolderById(String folderId) {
-    return Objects.requireNonNull(nodesApi.getNode(folderId, null, null, null).getBody())
-        .getEntry();
+  public Node getFolderByFolderId(String folderId) {
+    try {
+      return Objects.requireNonNull(nodesApi.getNode(folderId, null, null, null).getBody())
+          .getEntry();
+    } catch (Exception e) {
+      throw new FolderNotFoundException(FolderNotFoundException.FOLDER_NOT_FOUND);
+    }
   }
 
   @Override

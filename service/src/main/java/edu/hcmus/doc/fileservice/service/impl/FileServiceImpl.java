@@ -9,6 +9,7 @@ import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.service.FolderService;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -87,22 +88,32 @@ public class FileServiceImpl implements FileService {
         null, null, null, null, null).getBody()).getEntry();
 
     // Add the file node content
-    Node updatedFileNode = null;
+    Node savedFileNode = null;
     try {
-      updatedFileNode = Objects.requireNonNull(nodesApi.updateNodeContent(fileNode.getId(),
+      savedFileNode = Objects.requireNonNull(nodesApi.updateNodeContent(fileNode.getId(),
           multipartFile.getBytes(), true, null, null,
           null, null).getBody()).getEntry();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
 
-    return updatedFileNode;
+    return savedFileNode;
   }
 
   @Override
   public List<FileDto> saveAttachmentsByIncomingDocId(List<MultipartFile> multipartFiles,
       String incomingDocId) {
-    return null;
+    // create folder for incoming document attachments
+    String folderId = folderService.createAttachmentFolderForIncomingDocument(
+        incomingDocId);
+
+    // upload files to folder
+    List<FileDto> fileDtos = new ArrayList<>();
+    for (MultipartFile multipartFile : multipartFiles) {
+      Node file = uploadFile(multipartFile, folderId);
+    }
+
+    return fileDtos;
   }
 
   @Override

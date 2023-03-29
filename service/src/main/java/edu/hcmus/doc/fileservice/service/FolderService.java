@@ -6,7 +6,10 @@ import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
 
 public interface FolderService {
-  Node getFolderById(String folderId);
+
+  String createAttachmentFolderForIncomingDocument(String incomingDocumentId);
+
+  Node getFolderByFolderId(String folderId);
 
   List<Node> getFoldersBySiteId(String siteId);
 

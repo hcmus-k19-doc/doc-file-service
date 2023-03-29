@@ -10,4 +10,6 @@ public interface SiteService {
   Site getSiteBySiteId(String siteId);
 
   void deleteSiteBySiteId(String siteId);
+
+  Boolean isSiteExisted(String siteId);
 }

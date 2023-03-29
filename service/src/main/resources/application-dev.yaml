@@ -57,3 +57,10 @@ content:
     path: /alfresco/api/-default-/public/alfresco/versions/1
     search:
       path: /alfresco/api/-default-/public/search/versions/1
+
+alfresco:
+  default:
+    siteId: hcmus-k19-doc
+    siteTitle: HCMUS-K19-DOC
+    siteDescription: HCMUS-K19-DOC
+    siteVisibility: PRIVATE

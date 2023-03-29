@@ -18,8 +18,18 @@ public class SiteServiceImpl implements SiteService {
   private final SitesApi sitesApi;
 
   @Override
+  public Boolean isSiteExisted(String siteId) {
+    try {
+      sitesApi.getSite(siteId, null, null);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  @Override
   public Site createSite(SiteDto siteDto) {
-    if (getSiteBySiteId(siteDto.getId()) != null) {
+    if (isSiteExisted(siteDto.getId())) {
       throw new SiteAlreadyExistedException(SiteAlreadyExistedException.SITE_ALREADY_EXISTED);
     }
 
@@ -48,8 +58,10 @@ public class SiteServiceImpl implements SiteService {
 
   @Override
   public void deleteSiteBySiteId(String siteId) {
-    if (getSiteBySiteId(siteId) != null) {
-      sitesApi.deleteSite(siteId, null);
+    if (isSiteExisted(siteId)) {
+      sitesApi.deleteSite(siteId, true); // delete site permanently (by pass trashcan)
+    } else {
+      throw new SiteNotFoundException(SiteNotFoundException.SITE_NOT_FOUND);
     }
   }
 }
