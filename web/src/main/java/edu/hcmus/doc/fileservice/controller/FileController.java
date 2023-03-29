@@ -1,6 +1,7 @@
 package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.DocURL;
+import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.service.FileService;
 import java.util.List;
@@ -45,7 +46,10 @@ public class FileController {
 
   @PostMapping("/test/{incomingDocumentId}")
   public List<FileDto> testSaveAttachments(@PathVariable String incomingDocumentId, @RequestParam("attachments") List<MultipartFile> attachments) {
-    return fileService.saveAttachmentsByIncomingDocId(attachments, incomingDocumentId);
+    AttachmentPostDto attachmentPostDto = new AttachmentPostDto();
+    attachmentPostDto.setIncomingDocId(Long.valueOf(incomingDocumentId));
+    attachmentPostDto.setAttachments(attachments);
+    return fileService.saveAttachmentsByIncomingDocId(attachmentPostDto);
   }
 
 }

@@ -2,6 +2,7 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import static edu.hcmus.doc.fileservice.common.Constants.ALLOWED_FILE_TYPES;
 
+import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
@@ -99,16 +100,15 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public List<FileDto> saveAttachmentsByIncomingDocId(List<MultipartFile> multipartFiles,
-      String incomingDocId) {
+  public List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto) {
     // create folder for incoming document attachments
     String folderId = folderService.createAttachmentFolderForIncomingDocument(
-        incomingDocId);
+        attachmentPostDto.getIncomingDocId());
 
     // upload files to folder
     List<FileDto> fileDtos = new ArrayList<>();
-    for (MultipartFile multipartFile : multipartFiles) {
-      Node file = uploadFile(multipartFile, folderId);
+    for (MultipartFile attachment : attachmentPostDto.getAttachments()) {
+      Node file = uploadFile(attachment, folderId);
       fileDtos.add(fileMapper.toDto(file));
     }
 

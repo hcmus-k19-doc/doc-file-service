@@ -1,5 +1,6 @@
 package edu.hcmus.doc.fileservice.service;
 
+import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import java.util.List;
 import org.alfresco.core.model.Node;
@@ -14,7 +15,7 @@ public interface FileService {
 
   Node uploadFile(MultipartFile multipartFile, String parentFolderId);
 
-  List<FileDto> saveAttachmentsByIncomingDocId(List<MultipartFile> multipartFiles, String incomingDocId);
+  List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto);
 
   byte[] downloadFile(String fileId);
 }

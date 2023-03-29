@@ -48,7 +48,7 @@ public class FolderServiceImpl implements FolderService {
   private String siteVisibility;
 
   @Override
-  public String createAttachmentFolderForIncomingDocument(String incomingDocumentId) {
+  public String createAttachmentFolderForIncomingDocument(Long incomingDocumentId) {
     if (!siteService.isSiteExisted(siteId)) {
       SiteDto siteDto = new SiteDto();
       siteDto.setId(siteId);
