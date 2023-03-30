@@ -130,11 +130,14 @@ public class FileServiceImpl implements FileService {
     return savedFileNode;
   }
 
-  @RabbitListener(queues = "${spring.rabbitmq.template.default-receive-queue}")
   @Override
+  @RabbitListener(queues = "${spring.rabbitmq.template.attachment-queue}")
   public List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto) {
+    // get the routing key
 
+    System.out.println("Go to saveAttachmentsByIncomingDocId");
     System.out.println("Received request from main service");
+    System.out.println("IncomingDocId: " + attachmentPostDto.getIncomingDocId());
     // create folder for incoming document attachments
     String folderId = folderService.createAttachmentFolderForIncomingDocument(
         attachmentPostDto.getIncomingDocId());
