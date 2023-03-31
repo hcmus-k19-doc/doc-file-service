@@ -23,7 +23,7 @@ public class FolderController {
 
   @GetMapping("/{folderId}")
   public Node getFolderById(@PathVariable String folderId) {
-    return folderService.getFolderById(folderId);
+    return folderService.getFolderByFolderId(folderId);
   }
 
   @GetMapping("/content/{folderId}")

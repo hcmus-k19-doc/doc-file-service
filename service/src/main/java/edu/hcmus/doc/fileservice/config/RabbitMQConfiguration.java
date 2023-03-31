@@ -19,11 +19,17 @@ public class RabbitMQConfiguration {
   @Value("${spring.rabbitmq.template.default-receive-queue}")
   private String queue;
 
+  @Value("${spring.rabbitmq.template.attachment-queue}")
+  private String attachmentQueue;
+
   @Value("${spring.rabbitmq.template.exchange}")
   private String exchange;
 
   @Value("${spring.rabbitmq.template.routing-key}")
   private String routingKey;
+
+  @Value("${spring.rabbitmq.template.attachment-routing-key}")
+  private String attachmentRoutingKey;
 
   @Value("${spring.rabbitmq.username}")
   private String username;
@@ -40,6 +46,11 @@ public class RabbitMQConfiguration {
   }
 
   @Bean
+  Queue attachmentQueue() {
+    return new Queue(attachmentQueue, true);
+  }
+
+  @Bean
   Exchange docExchange() {
     return ExchangeBuilder.directExchange(exchange).durable(true).build();
   }
@@ -50,6 +61,15 @@ public class RabbitMQConfiguration {
         .bind(docQueue())
         .to(docExchange())
         .with(routingKey)
+        .noargs();
+  }
+
+  @Bean
+  Binding attachmentBinding() {
+    return BindingBuilder
+        .bind(attachmentQueue())
+        .to(docExchange())
+        .with(attachmentRoutingKey)
         .noargs();
   }
 

@@ -1,9 +1,9 @@
 package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.model.dto.ExceptionDto;
-import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.model.exception.ResourceAlreadyExistedException;
+import edu.hcmus.doc.fileservice.model.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,6 +26,14 @@ public class ExceptionController {
       ResourceAlreadyExistedException exception) {
     return ResponseEntity
         .status(HttpStatus.CONFLICT)
+        .body(new ExceptionDto(exception.getMessage()));
+  }
+
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<ExceptionDto> handleResourceNotFoundException(
+      ResourceNotFoundException exception) {
+    return ResponseEntity
+        .status(HttpStatus.NOT_FOUND)
         .body(new ExceptionDto(exception.getMessage()));
   }
 
