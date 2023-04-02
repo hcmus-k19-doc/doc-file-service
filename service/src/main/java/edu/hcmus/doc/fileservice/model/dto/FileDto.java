@@ -1,8 +1,10 @@
 package edu.hcmus.doc.fileservice.model.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class FileDto {
 
   private String id;
@@ -16,4 +18,5 @@ public class FileDto {
   private Double size;
   private String mimeType;
   private String url;
+  private byte[] data;
 }

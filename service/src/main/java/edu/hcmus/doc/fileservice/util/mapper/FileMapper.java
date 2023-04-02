@@ -21,6 +21,7 @@ public interface FileMapper {
   @Mapping(source = "content.mimeType", target = "mimeType")
   @Mapping(target = "url", ignore = true)
   @Mapping(target = "description", ignore = true)
+  @Mapping(target = "data", ignore = true)
   FileDto toDto(Node file);
 
   @Named("offsetDateTimeToString")

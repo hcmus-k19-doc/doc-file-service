@@ -1,5 +1,6 @@
-package edu.hcmus.doc.fileservice.model.dto;
+package edu.hcmus.doc.fileservice.model.dto.Attachment;
 
+import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import java.util.List;
 import lombok.Data;
 

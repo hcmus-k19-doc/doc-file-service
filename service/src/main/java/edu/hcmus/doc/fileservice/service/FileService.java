@@ -1,6 +1,7 @@
 package edu.hcmus.doc.fileservice.service;
 
-import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
+import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
+import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import java.util.List;
@@ -20,5 +21,5 @@ public interface FileService {
 
   List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto);
 
-  byte[] downloadFile(String fileId);
+  FileDto downloadFile(AttachmentDto attachmentDto);
 }

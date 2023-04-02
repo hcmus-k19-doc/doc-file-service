@@ -2,7 +2,8 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import static edu.hcmus.doc.fileservice.common.Constants.ALLOWED_FILE_TYPES;
 
-import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
+import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
+import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
@@ -153,15 +154,19 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public byte[] downloadFile(String fileId) {
+  public FileDto downloadFile(AttachmentDto attachmentDto) {
     Boolean attachment = true;
     OffsetDateTime ifModifiedSince = null;
     String range = null;
 
-    Resource content = nodesApi.getNodeContent(fileId, attachment, ifModifiedSince, range)
-        .getBody();
+    Resource content = nodesApi.getNodeContent(attachmentDto.getAlfrescoFileId(), attachment,
+        ifModifiedSince, range).getBody();
     try {
-      return content.getInputStream().readAllBytes();
+      return FileDto.builder()
+          .data(content.getInputStream().readAllBytes())
+          .title(content.getFilename())
+          .mimeType(attachmentDto.getFileType().value)
+          .build();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
