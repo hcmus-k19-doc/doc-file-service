@@ -43,13 +43,13 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public Boolean isValidFile(String fileName, String fileExtension, String parentFolderId) {
+  public Boolean isValidFile(String fileName, String fileType, String parentFolderId) {
     // check if file already exists
     if (isFileExist(fileName, parentFolderId)) {
       throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
     }
     // check if file type is allowed
-    if (ALLOWED_FILE_TYPES.contains(fileExtension)) {
+    if (ALLOWED_FILE_TYPES.contains(fileType)) {
       return true;
     }
     return false;
@@ -76,7 +76,7 @@ public class FileServiceImpl implements FileService {
     }
 
     // check if file type is allowed
-    if (!ALLOWED_FILE_TYPES.contains(multipartFile.getContentType().split("/")[1].toLowerCase())) {
+    if (!ALLOWED_FILE_TYPES.contains(multipartFile.getContentType().toLowerCase())) {
       throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
     }
 
@@ -109,7 +109,7 @@ public class FileServiceImpl implements FileService {
     }
 
     // check if file type is allowed
-    if (!ALLOWED_FILE_TYPES.contains(fileWrapper.getContentType().split("/")[1].toLowerCase())) {
+    if (!ALLOWED_FILE_TYPES.contains(fileWrapper.getContentType().toLowerCase())) {
       throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
     }
 
@@ -154,19 +154,14 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public byte[] downloadFile(String fileId) {
-    // Relevant when using API call from web browser, true is the default
     Boolean attachment = true;
-    // Only download if modified since this time, optional
     OffsetDateTime ifModifiedSince = null;
-    // The Range header indicates the part of a document that the server should return.
-    // Single part request supported, for example: bytes=1-10., optional
     String range = null;
 
     Resource content = nodesApi.getNodeContent(fileId, attachment, ifModifiedSince, range)
         .getBody();
     try {
-      byte[] bytes = content.getInputStream().readAllBytes();
-      return bytes;
+      return content.getInputStream().readAllBytes();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
