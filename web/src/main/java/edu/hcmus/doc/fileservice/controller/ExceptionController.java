@@ -1,6 +1,7 @@
 package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.model.dto.ExceptionDto;
+import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.model.exception.ResourceAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.ResourceNotFoundException;
@@ -34,6 +35,14 @@ public class ExceptionController {
       ResourceNotFoundException exception) {
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
+        .body(new ExceptionDto(exception.getMessage()));
+  }
+
+  @ExceptionHandler(AttachmentNoContentException.class)
+  public ResponseEntity<ExceptionDto> handleAttachmentNoContentException(
+      AttachmentNoContentException exception) {
+    return ResponseEntity
+        .status(HttpStatus.NO_CONTENT)
         .body(new ExceptionDto(exception.getMessage()));
   }
 

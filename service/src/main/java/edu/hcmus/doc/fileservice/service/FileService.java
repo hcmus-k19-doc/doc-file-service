@@ -22,4 +22,7 @@ public interface FileService {
   List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto);
 
   FileDto downloadFile(AttachmentDto attachmentDto);
+
+  byte[] downloadIncomingDocFolder(List<AttachmentDto> attachmentDtoList);
+
 }

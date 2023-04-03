@@ -6,18 +6,23 @@ import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
 import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
+import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
 import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.service.FolderService;
 import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
@@ -170,5 +175,33 @@ public class FileServiceImpl implements FileService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @SneakyThrows
+  @Override
+  public byte[] downloadIncomingDocFolder(List<AttachmentDto> attachmentDtoList) {
+    if (attachmentDtoList.isEmpty()) {
+      throw new AttachmentNoContentException(AttachmentNoContentException.ATTACHMENT_NO_CONTENT);
+    }
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+
+    attachmentDtoList.stream().forEach(attachmentDto -> {
+      FileDto fileDto = downloadFile(attachmentDto);
+      try {
+        ZipEntry zipEntry = new ZipEntry(fileDto.getTitle());
+        zipOutputStream.putNextEntry(zipEntry);
+        zipOutputStream.write(fileDto.getData());
+
+        // Close the zip entry
+        zipOutputStream.closeEntry();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    zipOutputStream.close();
+    return byteArrayOutputStream.toByteArray();
   }
 }
