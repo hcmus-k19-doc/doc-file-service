@@ -1,16 +1,18 @@
 package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.DocURL;
+import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
 import edu.hcmus.doc.fileservice.service.FileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.alfresco.core.model.Node;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,20 +36,20 @@ public class FileController {
     return fileService.uploadFile(multipartFile, parentFolderId);
   }
 
-  @GetMapping("/download/{fileId}")
-  public ResponseEntity<?> downloadFile(@PathVariable String fileId) {
-    byte[] fileContent = fileService.downloadFile(fileId);
-    return ResponseEntity.status(HttpStatus.OK)
-        .contentType(MediaType.valueOf("application/pdf"))
-        .body(fileContent);
-  }
+  @PostMapping("/download/{incomingDocId}")
+  public ResponseEntity<ByteArrayResource> downloadFile(@RequestBody List<AttachmentDto> attachmentDtoList,
+      @PathVariable String incomingDocId) {
 
-//  @PostMapping("/test/{incomingDocumentId}")
-//  public List<FileDto> testSaveAttachments(@PathVariable String incomingDocumentId, @RequestParam("attachments") List<MultipartFile> attachments) {
-//    AttachmentPostDto attachmentPostDto = new AttachmentPostDto();
-//    attachmentPostDto.setIncomingDocId(Long.valueOf(incomingDocumentId));
-//    attachmentPostDto.setAttachments(attachments);
-//    return fileService.saveAttachmentsByIncomingDocId(attachmentPostDto);
-//  }
+    byte[] data = fileService.downloadIncomingDocFolder(attachmentDtoList);
+        String zipName = "ICD_" + incomingDocId + "_attachments.zip";
+    ByteArrayResource resource = new ByteArrayResource(data);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipName);
+    headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+    headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(data.length));
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(resource);
+  }
 
 }

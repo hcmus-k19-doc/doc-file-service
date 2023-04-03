@@ -2,21 +2,27 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import static edu.hcmus.doc.fileservice.common.Constants.ALLOWED_FILE_TYPES;
 
-import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
+import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
+import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
+import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
 import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.service.FolderService;
 import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
@@ -43,16 +49,13 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public Boolean isValidFile(String fileName, String fileExtension, String parentFolderId) {
+  public Boolean isValidFile(String fileName, String fileType, String parentFolderId) {
     // check if file already exists
     if (isFileExist(fileName, parentFolderId)) {
       throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
     }
     // check if file type is allowed
-    if (ALLOWED_FILE_TYPES.contains(fileExtension)) {
-      return true;
-    }
-    return false;
+    return ALLOWED_FILE_TYPES.contains(fileType);
   }
 
   @Override
@@ -76,7 +79,7 @@ public class FileServiceImpl implements FileService {
     }
 
     // check if file type is allowed
-    if (!ALLOWED_FILE_TYPES.contains(multipartFile.getContentType().split("/")[1].toLowerCase())) {
+    if (!ALLOWED_FILE_TYPES.contains(multipartFile.getContentType().toLowerCase())) {
       throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
     }
 
@@ -89,7 +92,7 @@ public class FileServiceImpl implements FileService {
         null, null, null, null, null).getBody()).getEntry();
 
     // Add the file node content
-    Node savedFileNode = null;
+    Node savedFileNode;
     try {
       savedFileNode = Objects.requireNonNull(nodesApi.updateNodeContent(fileNode.getId(),
           multipartFile.getBytes(), true, null, null,
@@ -109,7 +112,7 @@ public class FileServiceImpl implements FileService {
     }
 
     // check if file type is allowed
-    if (!ALLOWED_FILE_TYPES.contains(fileWrapper.getContentType().split("/")[1].toLowerCase())) {
+    if (!ALLOWED_FILE_TYPES.contains(fileWrapper.getContentType().toLowerCase())) {
       throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
     }
 
@@ -122,7 +125,7 @@ public class FileServiceImpl implements FileService {
         null, null, null, null, null).getBody()).getEntry();
 
     // Add the file node content
-    Node savedFileNode = null;
+    Node savedFileNode;
     savedFileNode = Objects.requireNonNull(nodesApi.updateNodeContent(fileNode.getId(),
         fileWrapper.getData(), true, null, null,
         null, null).getBody()).getEntry();
@@ -153,22 +156,49 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public byte[] downloadFile(String fileId) {
-    // Relevant when using API call from web browser, true is the default
+  public FileDto downloadFile(AttachmentDto attachmentDto) {
     Boolean attachment = true;
-    // Only download if modified since this time, optional
     OffsetDateTime ifModifiedSince = null;
-    // The Range header indicates the part of a document that the server should return.
-    // Single part request supported, for example: bytes=1-10., optional
     String range = null;
 
-    Resource content = nodesApi.getNodeContent(fileId, attachment, ifModifiedSince, range)
-        .getBody();
+    Resource content = nodesApi.getNodeContent(attachmentDto.getAlfrescoFileId(), attachment,
+        ifModifiedSince, range).getBody();
     try {
-      byte[] bytes = content.getInputStream().readAllBytes();
-      return bytes;
+      return FileDto.builder()
+          .data(content.getInputStream().readAllBytes())
+          .title(content.getFilename())
+          .mimeType(attachmentDto.getFileType().value)
+          .build();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @SneakyThrows
+  @Override
+  public byte[] downloadIncomingDocFolder(List<AttachmentDto> attachmentDtoList) {
+    if (attachmentDtoList.isEmpty()) {
+      throw new AttachmentNoContentException(AttachmentNoContentException.ATTACHMENT_NO_CONTENT);
+    }
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+
+    attachmentDtoList.forEach(attachmentDto -> {
+      FileDto fileDto = downloadFile(attachmentDto);
+      try {
+        ZipEntry zipEntry = new ZipEntry(fileDto.getTitle());
+        zipOutputStream.putNextEntry(zipEntry);
+        zipOutputStream.write(fileDto.getData());
+
+        // Close the zip entry
+        zipOutputStream.closeEntry();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    zipOutputStream.close();
+    return byteArrayOutputStream.toByteArray();
   }
 }
