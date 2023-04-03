@@ -55,10 +55,7 @@ public class FileServiceImpl implements FileService {
       throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
     }
     // check if file type is allowed
-    if (ALLOWED_FILE_TYPES.contains(fileType)) {
-      return true;
-    }
-    return false;
+    return ALLOWED_FILE_TYPES.contains(fileType);
   }
 
   @Override
@@ -95,7 +92,7 @@ public class FileServiceImpl implements FileService {
         null, null, null, null, null).getBody()).getEntry();
 
     // Add the file node content
-    Node savedFileNode = null;
+    Node savedFileNode;
     try {
       savedFileNode = Objects.requireNonNull(nodesApi.updateNodeContent(fileNode.getId(),
           multipartFile.getBytes(), true, null, null,
@@ -128,7 +125,7 @@ public class FileServiceImpl implements FileService {
         null, null, null, null, null).getBody()).getEntry();
 
     // Add the file node content
-    Node savedFileNode = null;
+    Node savedFileNode;
     savedFileNode = Objects.requireNonNull(nodesApi.updateNodeContent(fileNode.getId(),
         fileWrapper.getData(), true, null, null,
         null, null).getBody()).getEntry();
@@ -187,7 +184,7 @@ public class FileServiceImpl implements FileService {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
 
-    attachmentDtoList.stream().forEach(attachmentDto -> {
+    attachmentDtoList.forEach(attachmentDto -> {
       FileDto fileDto = downloadFile(attachmentDto);
       try {
         ZipEntry zipEntry = new ZipEntry(fileDto.getTitle());
