@@ -140,10 +140,10 @@ public class FileServiceImpl implements FileService {
 
     System.out.println("Go to saveAttachmentsByIncomingDocId");
     System.out.println("Received request from main service");
-    System.out.println("IncomingDocId: " + attachmentPostDto.getIncomingDocId());
+    System.out.println("IncomingDocId: " + attachmentPostDto.getDocId());
     // create folder for incoming document attachments
     String folderId = folderService.createAttachmentFolderForIncomingDocument(
-        attachmentPostDto.getIncomingDocId());
+        attachmentPostDto.getDocId());
 
     // upload files to folder
     List<FileDto> fileDtos = new ArrayList<>();

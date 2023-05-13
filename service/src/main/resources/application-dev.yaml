@@ -15,7 +15,7 @@ spring:
       max-request-size: 3000KB # max request size for a multipart/form-data.
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/alfresco
+    url: jdbc:postgresql://18.138.129.181:5432/alfresco
     username: alfresco
     password: alfresco
 
@@ -24,7 +24,7 @@ spring:
       enabled: false
 
   activemq:
-    broker-url: tcp://localhost:61616
+    broker-url: tcp://18.138.129.181:61616
 
   elasticsearch:
     uris: localhost:9200
@@ -33,7 +33,7 @@ spring:
     connection-timeout: 1s
 
   rabbitmq:
-    host: localhost
+    host: 13.215.56.216
     port: 5672
     username: guest
     password: guest
@@ -55,7 +55,7 @@ content:
         username: admin
         password: admin
     # Location of the server and API endpoints
-    url: http://localhost:8181
+    url: http://18.138.129.181:8181
     path: /alfresco/api/-default-/public/alfresco/versions/1
     search:
       path: /alfresco/api/-default-/public/search/versions/1
