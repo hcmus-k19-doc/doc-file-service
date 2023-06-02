@@ -2,8 +2,12 @@ package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.DocURL;
 import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
+import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.service.FileService;
+import edu.hcmus.doc.fileservice.service.S3Service;
+import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.alfresco.core.model.Node;
@@ -25,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileController {
 
   private final FileService fileService;
+  private final S3Service s3Service;
+  private final FileMapper fileMapper;
 
   @GetMapping
   public List<String> getFiles() {
@@ -53,5 +59,16 @@ public class FileController {
     return ResponseEntity.ok()
         .headers(headers)
         .body(resource);
+  }
+
+  @GetMapping("/s3")
+  public List<FileDto> getS3BucketName() {
+    return s3Service.getFiles().stream().map(fileMapper::toDto).toList();
+  }
+
+  @SneakyThrows
+  @PostMapping("/s3")
+  public boolean uploadFileToS3(@RequestParam("file") MultipartFile multipartFile) {
+    return s3Service.uploadFile(multipartFile);
   }
 }

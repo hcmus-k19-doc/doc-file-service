@@ -10,7 +10,7 @@ import org.alfresco.core.model.Node;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {
-  Boolean isValidFile(String fileName, String fileExtension, String parentFolderId);
+  boolean isValidFile(String fileName, String fileExtension, String parentFolderId);
 
   boolean isFileExist(String fileName, String parentFolderId);
 

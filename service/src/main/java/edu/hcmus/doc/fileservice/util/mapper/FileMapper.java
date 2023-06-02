@@ -1,13 +1,17 @@
 package edu.hcmus.doc.fileservice.util.mapper;
 
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
+import edu.hcmus.doc.fileservice.util.mapper.decorator.FileMapperDecorator;
 import java.time.OffsetDateTime;
 import org.alfresco.core.model.Node;
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Mapper(componentModel = "spring")
+@DecoratedWith(FileMapperDecorator.class)
 public interface FileMapper {
 
   @Mapping(source = "id", target = "id")
@@ -23,6 +27,8 @@ public interface FileMapper {
   @Mapping(target = "description", ignore = true)
   @Mapping(target = "data", ignore = true)
   FileDto toDto(Node file);
+
+  FileDto toDto(S3Object file);
 
   @Named("offsetDateTimeToString")
   default String offsetDateTimeToString(OffsetDateTime offsetDateTime) {

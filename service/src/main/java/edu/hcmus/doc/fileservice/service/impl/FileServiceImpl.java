@@ -32,10 +32,12 @@ import org.alfresco.core.model.NodeChildAssociationEntry;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -55,7 +57,7 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public Boolean isValidFile(String fileName, String fileType, String parentFolderId) {
+  public boolean isValidFile(String fileName, String fileType, String parentFolderId) {
     // check if file already exists
     if (isFileExist(fileName, parentFolderId)) {
       throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
