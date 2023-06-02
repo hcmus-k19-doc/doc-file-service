@@ -1,12 +1,13 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
-import static edu.hcmus.doc.fileservice.common.Constants.ALLOWED_FILE_TYPES;
+import static edu.hcmus.doc.fileservice.model.enums.FileType.ALLOWED_FILE_TYPES;
 
 import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
 import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
+import edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException;
 import edu.hcmus.doc.fileservice.model.exception.FileAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.FileService;
@@ -14,27 +15,32 @@ import edu.hcmus.doc.fileservice.service.FolderService;
 import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.model.Node;
 import org.alfresco.core.model.NodeBodyCreate;
 import org.alfresco.core.model.NodeChildAssociationEntry;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional(rollbackFor = Throwable.class)
 public class FileServiceImpl implements FileService {
 
   private final NodesApi nodesApi;
@@ -59,9 +65,9 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public Boolean isFileExist(String fileName, String parentFolderId) {
+  public boolean isFileExist(String fileName, String parentFolderId) {
     NodeChildAssociationPagingList folderContent = folderService.getFolderContent(parentFolderId);
-    if (folderContent.getEntries().size() > 0) {
+    if (!folderContent.getEntries().isEmpty()) {
       for (NodeChildAssociationEntry nodeEntry : folderContent.getEntries()) {
         if (nodeEntry.getEntry().getName().equals(fileName)) {
           return true;
@@ -72,14 +78,14 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public Node uploadFile(MultipartFile multipartFile, String parentFolderId) {
+  public Node uploadFile(MultipartFile multipartFile, String parentFolderId) throws IOException {
     // check if file already exists
     if (isFileExist(multipartFile.getOriginalFilename(), parentFolderId)) {
       throw new FileAlreadyExistedException(FileAlreadyExistedException.FILE_ALREADY_EXISTED);
     }
 
     // check if file type is allowed
-    if (!ALLOWED_FILE_TYPES.contains(multipartFile.getContentType().toLowerCase())) {
+    if (!CollectionUtils.containsAny(ALLOWED_FILE_TYPES, multipartFile.getContentType())) {
       throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
     }
 
@@ -87,21 +93,32 @@ public class FileServiceImpl implements FileService {
         null).getBody()).getEntry();
 
     // Create the file node metadata
-    Node fileNode = Objects.requireNonNull(nodesApi.createNode(parentFolderNode.getId(),
-        new NodeBodyCreate().nodeType("cm:content").name(multipartFile.getOriginalFilename()),
-        null, null, null, null, null).getBody()).getEntry();
+    Node fileNode = Optional.ofNullable(
+            nodesApi.createNode(
+                    parentFolderNode.getId(),
+                    new NodeBodyCreate().nodeType("cm:content")
+                        .name(multipartFile.getOriginalFilename()),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null)
+                .getBody())
+        .orElseThrow()
+        .getEntry();
 
     // Add the file node content
-    Node savedFileNode;
-    try {
-      savedFileNode = Objects.requireNonNull(nodesApi.updateNodeContent(fileNode.getId(),
-          multipartFile.getBytes(), true, null, null,
-          null, null).getBody()).getEntry();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return savedFileNode;
+    return Optional.ofNullable(
+            nodesApi.updateNodeContent(
+                fileNode.getId(),
+                multipartFile.getBytes(),
+                true,
+                null,
+                null,
+                null,
+                null).getBody())
+        .orElseThrow()
+        .getEntry();
   }
 
   @Override
@@ -138,9 +155,9 @@ public class FileServiceImpl implements FileService {
   public List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto) {
     // get the routing key
 
-    System.out.println("Go to saveAttachmentsByIncomingDocId");
-    System.out.println("Received request from main service");
-    System.out.println("IncomingDocId: " + attachmentPostDto.getDocId());
+    log.info("Go to saveAttachmentsByIncomingDocId");
+    log.info("Received request from main service");
+    log.info("IncomingDocId: {}", attachmentPostDto.getDocId());
     // create folder for incoming document attachments
     String folderId = folderService.createAttachmentFolderForIncomingDocument(
         attachmentPostDto.getDocId());
@@ -158,11 +175,10 @@ public class FileServiceImpl implements FileService {
   @Override
   public FileDto downloadFile(AttachmentDto attachmentDto) {
     Boolean attachment = true;
-    OffsetDateTime ifModifiedSince = null;
-    String range = null;
 
-    Resource content = nodesApi.getNodeContent(attachmentDto.getAlfrescoFileId(), attachment,
-        ifModifiedSince, range).getBody();
+    Resource content = Optional.ofNullable(nodesApi.getNodeContent(
+        attachmentDto.getAlfrescoFileId(), attachment,
+        null, null).getBody()).orElseThrow();
     try {
       return FileDto.builder()
           .data(content.getInputStream().readAllBytes())
@@ -170,7 +186,7 @@ public class FileServiceImpl implements FileService {
           .mimeType(attachmentDto.getFileType().value)
           .build();
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new DocFileServiceRuntimeException(e);
     }
   }
 
@@ -194,7 +210,7 @@ public class FileServiceImpl implements FileService {
         // Close the zip entry
         zipOutputStream.closeEntry();
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new DocFileServiceRuntimeException(e);
       }
     });
 

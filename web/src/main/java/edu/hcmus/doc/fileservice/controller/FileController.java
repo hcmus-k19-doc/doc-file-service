@@ -5,6 +5,7 @@ import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
 import edu.hcmus.doc.fileservice.service.FileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.alfresco.core.model.Node;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +32,9 @@ public class FileController {
   }
 
   @PostMapping
-  public Node uploadFile(@RequestParam("file") MultipartFile multipartFile,
+  @SneakyThrows
+  public Node uploadFile(
+      @RequestParam("file") MultipartFile multipartFile,
       @RequestParam("parentFolderId") String parentFolderId) {
     return fileService.uploadFile(multipartFile, parentFolderId);
   }
@@ -51,5 +54,4 @@ public class FileController {
         .headers(headers)
         .body(resource);
   }
-
 }

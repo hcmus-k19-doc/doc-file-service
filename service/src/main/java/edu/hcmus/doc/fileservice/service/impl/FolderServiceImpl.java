@@ -9,6 +9,7 @@ import edu.hcmus.doc.fileservice.service.SiteService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.handler.SitesApi;
@@ -125,7 +126,18 @@ public class FolderServiceImpl implements FolderService {
     String where = null;
     Boolean includeSource = false;
 
-    NodeChildAssociationPagingList result = nodesApi.listNodeChildren(folderId, skipCount, maxItems, orderBy, where, include,null, includeSource, fields).getBody().getList();
-    return result;
+    return Optional.ofNullable(nodesApi.listNodeChildren(
+                folderId,
+                skipCount,
+                maxItems,
+                orderBy,
+                where,
+                include,
+                null,
+                includeSource,
+                fields)
+            .getBody())
+        .orElseThrow()
+        .getList();
   }
 }
