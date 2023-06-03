@@ -3,16 +3,19 @@ package edu.hcmus.doc.fileservice.controller;
 import edu.hcmus.doc.fileservice.DocURL;
 import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
+import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
 import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.service.S3Service;
 import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.alfresco.core.model.Node;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,7 +54,7 @@ public class FileController {
       @PathVariable String incomingDocId) {
 
     byte[] data = fileService.downloadIncomingDocFolder(attachmentDtoList);
-        String zipName = "ICD_" + incomingDocId + "_attachments.zip";
+    String zipName = "ICD_" + incomingDocId + "_attachments.zip";
     ByteArrayResource resource = new ByteArrayResource(data);
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipName);
@@ -62,13 +66,37 @@ public class FileController {
   }
 
   @GetMapping("/s3")
-  public List<FileDto> getS3BucketName() {
+  public List<FileDto> getFilesFromS3() {
     return s3Service.getFiles().stream().map(fileMapper::toDto).toList();
   }
 
   @SneakyThrows
-  @PostMapping("/s3")
-  public boolean uploadFileToS3(@RequestParam("file") MultipartFile multipartFile) {
-    return s3Service.uploadFile(multipartFile);
+  @GetMapping("/s3/{parentFolder}/{folderName}")
+  public ResponseEntity<ByteArrayResource> downloadFileFromS3(
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName) {
+    ByteArrayResource resource = s3Service.downloadFilesByParentFolderAndFolderName(parentFolder, folderName);
+    String zipName = StringUtils.join(
+        List.of(parentFolder, folderName, "attachments.zip"),
+        "_"
+    );
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipName);
+    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(resource.contentLength()));
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(resource);
+  }
+
+  @SneakyThrows
+  @PostMapping(value = "/s3/{parentFolder}/{folderName}")
+  @ResponseStatus(HttpStatus.CREATED)
+  public void uploadFileToS3(
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName,
+      @RequestParam MultipartFile file) {
+    s3Service.uploadFile(parentFolder, folderName, file);
   }
 }

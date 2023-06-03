@@ -1,25 +1,35 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
+import static edu.hcmus.doc.fileservice.model.enums.FileType.ALLOWED_FILE_TYPES;
+
+import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
+import edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException;
+import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.S3Service;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.CompletedPart;
-import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(rollbackFor = Throwable.class)
 @Service
@@ -40,12 +50,69 @@ public class S3ServiceImpl implements S3Service {
   }
 
   @Override
-  public boolean uploadFile(MultipartFile multipartFile) throws IOException {
+  public ByteArrayResource downloadFilesByParentFolderAndFolderName(
+      ParentFolderEnum parentFolder,
+      String folderName) throws IOException {
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    String prefix = StringUtils.join(List.of(parentFolder, folderName), "/");
+
+    try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
+      ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
+          .bucket(s3BucketName)
+          .prefix(prefix)
+          .build();
+      List<S3Object> contents = s3Client.listObjectsV2(listObjectsV2Request).contents();
+      List<String> fileKeys = contents
+          .stream()
+          .map(S3Object::key)
+          .filter(key -> !key.equals(prefix + "/"))
+          .toList();
+
+      fileKeys.forEach(k -> {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(k)
+            .bucket(s3BucketName)
+            .build();
+
+        s3Client.getObject(objectRequest);
+
+        try {
+          ZipEntry zipEntry = new ZipEntry(k);
+          zipOutputStream.putNextEntry(zipEntry);
+          zipOutputStream.write(s3Client.getObject(objectRequest).readAllBytes());
+        } catch (IOException e) {
+          throw new DocFileServiceRuntimeException("Error when zip file", e);
+        }
+      });
+    }
+
+    return new ByteArrayResource(byteArrayOutputStream.toByteArray());
+  }
+
+  @Override
+  public void uploadFile(
+      ParentFolderEnum parentFolder,
+      String folderName,
+      MultipartFile file) throws IOException {
+
+    if (!CollectionUtils.containsAny(ALLOWED_FILE_TYPES, file.getContentType())) {
+      throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
+    }
+
     PutObjectRequest objectRequest = PutObjectRequest.builder()
+        .key(StringUtils.join(
+            List.of(
+                parentFolder,
+                folderName,
+                Objects.requireNonNull(file.getOriginalFilename()))
+            ,
+            "/"
+        ))
         .bucket(s3BucketName)
         .build();
 
-    s3Client.putObject(objectRequest, RequestBody.fromByteBuffer(ByteBuffer.wrap(multipartFile.getBytes())));
-    return false;
+    s3Client.putObject(objectRequest, RequestBody.fromByteBuffer(ByteBuffer.wrap(file.getBytes())));
   }
 }

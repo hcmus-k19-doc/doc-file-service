@@ -16,6 +16,8 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <awssdk.version>2.20.77</awssdk.version>
+    <aws.crt.version>0.21.15</aws.crt.version>
   </properties>
 
   <repositories>
@@ -54,6 +56,16 @@
       <groupId>software.amazon.awssdk</groupId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3-transfer-manager</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk.crt</groupId>
+      <artifactId>aws-crt</artifactId>
+      <version>${aws.crt.version}</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
@@ -61,7 +73,7 @@
       <dependency>
         <groupId>software.amazon.awssdk</groupId>
         <artifactId>bom</artifactId>
-        <version>2.20.77</version>
+        <version>${awssdk.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

@@ -18,7 +18,7 @@ public class ExceptionController {
   public ResponseEntity<ExceptionDto> handleFileTypeNotAcceptedException(
       FileTypeNotAcceptedException exception) {
     return ResponseEntity
-        .status(HttpStatus.EXPECTATION_FAILED)
+        .status(HttpStatus.BAD_REQUEST)
         .body(new ExceptionDto(exception.getMessage()));
   }
 
@@ -47,11 +47,10 @@ public class ExceptionController {
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException.class)
-  public ResponseEntity<ExceptionDto> handleMaxSizeException(
-      MaxUploadSizeExceededException exception) {
+  public ResponseEntity<ExceptionDto> handleMaxSizeException() {
     return ResponseEntity
-        .status(HttpStatus.EXPECTATION_FAILED)
-        .body(new ExceptionDto("FILE.FILE_TOO_LARGE"));
+        .status(HttpStatus.BAD_REQUEST)
+        .body(new ExceptionDto("file.file_too_large"));
   }
 
   @ExceptionHandler(Throwable.class)
