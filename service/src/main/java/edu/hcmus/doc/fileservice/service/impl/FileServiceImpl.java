@@ -2,8 +2,8 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import static edu.hcmus.doc.fileservice.model.enums.FileType.ALLOWED_FILE_TYPES;
 
-import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
-import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentPostDto;
+import edu.hcmus.doc.fileservice.model.dto.AttachmentDto;
+import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
@@ -31,7 +31,6 @@ import org.alfresco.core.model.NodeBodyCreate;
 import org.alfresco.core.model.NodeChildAssociationEntry;
 import org.alfresco.core.model.NodeChildAssociationPagingList;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -151,7 +150,6 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  @RabbitListener(queues = "${spring.rabbitmq.template.attachment-queue}")
   public List<FileDto> saveAttachmentsByIncomingDocId(AttachmentPostDto attachmentPostDto) {
     // get the routing key
 

@@ -33,7 +33,7 @@ spring:
     connection-timeout: 1s
 
   rabbitmq:
-    host: 13.215.56.216
+    host: localhost
     port: 5672
     username: guest
     password: guest
@@ -43,6 +43,8 @@ spring:
       default-receive-queue: doc.doc-main-queue
       attachment-queue: doc.attachment-queue
       attachment-routing-key: doc.attachment-routing-key
+      s3-attachment-queue: doc.s3-attachment-queue
+      s3-attachment-routing-key: doc.s3-attachment-routing-key
 
 server:
   port: 8081

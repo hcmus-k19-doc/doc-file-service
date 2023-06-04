@@ -1,7 +1,7 @@
 package edu.hcmus.doc.fileservice.service;
 
-import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
-import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentPostDto;
+import edu.hcmus.doc.fileservice.model.dto.AttachmentDto;
+import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import java.io.IOException;

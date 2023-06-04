@@ -2,10 +2,11 @@ package edu.hcmus.doc.fileservice.service.impl;
 
 import static edu.hcmus.doc.fileservice.model.enums.FileType.ALLOWED_FILE_TYPES;
 
+import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
 import edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
-import edu.hcmus.doc.fileservice.service.S3Service;
+import edu.hcmus.doc.fileservice.service.AwsS3Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,7 +34,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @RequiredArgsConstructor
 @Transactional(rollbackFor = Throwable.class)
 @Service
-public class S3ServiceImpl implements S3Service {
+public class AwsS3ServiceImpl implements AwsS3Service {
 
   @Value("${aws.s3.bucket-name}")
   private String s3BucketName;
@@ -114,5 +115,22 @@ public class S3ServiceImpl implements S3Service {
         .build();
 
     s3Client.putObject(objectRequest, RequestBody.fromByteBuffer(ByteBuffer.wrap(file.getBytes())));
+  }
+
+  @Override
+  public void uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) {
+    PutObjectRequest objectRequest = PutObjectRequest.builder()
+        .key(StringUtils.join(
+            List.of(
+                parentFolder,
+                folderName,
+                file.getFileName())
+            ,
+            "/"
+        ))
+        .bucket(s3BucketName)
+        .build();
+
+    s3Client.putObject(objectRequest, RequestBody.fromByteBuffer(ByteBuffer.wrap(file.getData())));
   }
 }

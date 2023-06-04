@@ -1,11 +1,11 @@
 package edu.hcmus.doc.fileservice.controller;
 
 import edu.hcmus.doc.fileservice.DocURL;
-import edu.hcmus.doc.fileservice.model.dto.Attachment.AttachmentDto;
+import edu.hcmus.doc.fileservice.model.dto.AttachmentDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
 import edu.hcmus.doc.fileservice.service.FileService;
-import edu.hcmus.doc.fileservice.service.S3Service;
+import edu.hcmus.doc.fileservice.service.AwsS3Service;
 import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileController {
 
   private final FileService fileService;
-  private final S3Service s3Service;
+  private final AwsS3Service awsS3Service;
   private final FileMapper fileMapper;
 
   @GetMapping
@@ -67,7 +67,7 @@ public class FileController {
 
   @GetMapping("/s3")
   public List<FileDto> getFilesFromS3() {
-    return s3Service.getFiles().stream().map(fileMapper::toDto).toList();
+    return awsS3Service.getFiles().stream().map(fileMapper::toDto).toList();
   }
 
   @SneakyThrows
@@ -75,7 +75,7 @@ public class FileController {
   public ResponseEntity<ByteArrayResource> downloadFileFromS3(
       @PathVariable ParentFolderEnum parentFolder,
       @PathVariable String folderName) {
-    ByteArrayResource resource = s3Service.downloadFilesByParentFolderAndFolderName(parentFolder, folderName);
+    ByteArrayResource resource = awsS3Service.downloadFilesByParentFolderAndFolderName(parentFolder, folderName);
     String zipName = StringUtils.join(
         List.of(parentFolder, folderName, "attachments.zip"),
         "_"
@@ -97,6 +97,6 @@ public class FileController {
       @PathVariable ParentFolderEnum parentFolder,
       @PathVariable String folderName,
       @RequestParam MultipartFile file) {
-    s3Service.uploadFile(parentFolder, folderName, file);
+    awsS3Service.uploadFile(parentFolder, folderName, file);
   }
 }

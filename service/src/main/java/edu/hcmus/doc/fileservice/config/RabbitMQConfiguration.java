@@ -1,10 +1,15 @@
 package edu.hcmus.doc.fileservice.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.ExchangeBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +26,9 @@ public class RabbitMQConfiguration {
 
   @Value("${spring.rabbitmq.template.attachment-queue}")
   private String attachmentQueue;
+
+  @Value("${spring.rabbitmq.template.s3-attachment-queue}")
+  private String s3AttachmentQueue;
 
   @Value("${spring.rabbitmq.template.exchange}")
   private String exchange;
@@ -51,6 +59,11 @@ public class RabbitMQConfiguration {
   }
 
   @Bean
+  Queue s3AttachmentQueue() {
+    return new Queue(s3AttachmentQueue, true);
+  }
+
+  @Bean
   Exchange docExchange() {
     return ExchangeBuilder.directExchange(exchange).durable(true).build();
   }
@@ -68,6 +81,15 @@ public class RabbitMQConfiguration {
   Binding attachmentBinding() {
     return BindingBuilder
         .bind(attachmentQueue())
+        .to(docExchange())
+        .with(attachmentRoutingKey)
+        .noargs();
+  }
+
+  @Bean
+  Binding s3AttachmentBinding() {
+    return BindingBuilder
+        .bind(s3AttachmentQueue())
         .to(docExchange())
         .with(attachmentRoutingKey)
         .noargs();
@@ -93,4 +115,8 @@ public class RabbitMQConfiguration {
     return rabbitTemplate;
   }
 
+  @Bean
+  public AsyncRabbitTemplate asyncRabbitTemplate(){
+    return new AsyncRabbitTemplate(rabbitTemplate(connectionFactory()));
+  }
 }
