@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -35,6 +37,8 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Transactional(rollbackFor = Throwable.class)
 @Service
 public class AwsS3ServiceImpl implements AwsS3Service {
+
+  private static final String MIME_TYPE = "MIME-Type";
 
   @Value("${aws.s3.bucket-name}")
   private String s3BucketName;
@@ -77,8 +81,6 @@ public class AwsS3ServiceImpl implements AwsS3Service {
             .bucket(s3BucketName)
             .build();
 
-        s3Client.getObject(objectRequest);
-
         try {
           ZipEntry zipEntry = new ZipEntry(k);
           zipOutputStream.putNextEntry(zipEntry);
@@ -112,25 +114,40 @@ public class AwsS3ServiceImpl implements AwsS3Service {
             "/"
         ))
         .bucket(s3BucketName)
+        .metadata(Map.of(
+            MIME_TYPE, Objects.requireNonNull(file.getContentType())
+        ))
         .build();
 
     s3Client.putObject(objectRequest, RequestBody.fromByteBuffer(ByteBuffer.wrap(file.getBytes())));
   }
 
   @Override
-  public void uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) {
+  public GetObjectResponse uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) {
+    if (!CollectionUtils.containsAny(ALLOWED_FILE_TYPES, file.getContentType())) {
+      throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
+    }
+
+    String key = StringUtils.join(List.of(parentFolder, folderName, file.getFileName()), "/");
     PutObjectRequest objectRequest = PutObjectRequest.builder()
-        .key(StringUtils.join(
-            List.of(
-                parentFolder,
-                folderName,
-                file.getFileName())
-            ,
-            "/"
-        ))
+        .key(key)
         .bucket(s3BucketName)
+        .metadata(Map.of(
+            MIME_TYPE, file.getContentType()
+        ))
         .build();
 
     s3Client.putObject(objectRequest, RequestBody.fromByteBuffer(ByteBuffer.wrap(file.getData())));
+
+    return getFile(key);
+  }
+
+  public GetObjectResponse getFile(String key) {
+    GetObjectRequest objectRequest = GetObjectRequest.builder()
+        .key(key)
+        .bucket(s3BucketName)
+        .build();
+
+    return s3Client.getObject(objectRequest).response();
   }
 }

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 public interface AwsS3Service {
@@ -16,5 +17,5 @@ public interface AwsS3Service {
 
   void uploadFile(ParentFolderEnum parentFolder, String folderName, MultipartFile file) throws IOException;
 
-  void uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) throws IOException;
+  GetObjectResponse uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) throws IOException;
 }

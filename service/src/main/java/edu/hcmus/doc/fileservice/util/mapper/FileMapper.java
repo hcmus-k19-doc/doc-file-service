@@ -8,6 +8,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Mapper(componentModel = "spring")
@@ -29,6 +30,11 @@ public interface FileMapper {
   FileDto toDto(Node file);
 
   FileDto toDto(S3Object file);
+
+  @Mapping(target = "parentFolderId", source = "parentFolder")
+  @Mapping(target = "id", source = "fileName")
+  @Mapping(target = "title", source = "fileName")
+  FileDto toDto(String parentFolder, String fileName, GetObjectResponse file);
 
   @Named("offsetDateTimeToString")
   default String offsetDateTimeToString(OffsetDateTime offsetDateTime) {
