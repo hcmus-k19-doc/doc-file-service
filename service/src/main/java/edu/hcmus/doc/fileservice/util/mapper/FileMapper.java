@@ -31,10 +31,19 @@ public interface FileMapper {
 
   FileDto toDto(S3Object file);
 
-  @Mapping(target = "parentFolderId", source = "parentFolder")
-  @Mapping(target = "id", source = "fileName")
+  @Mapping(target = "url", ignore = true)
+  @Mapping(target = "size", ignore = true)
+  @Mapping(target = "modifier", ignore = true)
+  @Mapping(target = "modifiedDate", ignore = true)
+  @Mapping(target = "mimeType", ignore = true)
+  @Mapping(target = "description", ignore = true)
+  @Mapping(target = "data", ignore = true)
+  @Mapping(target = "creator", ignore = true)
+  @Mapping(target = "createdDate", ignore = true)
+  @Mapping(target = "parentFolderId", expression = "java(parentFolder + \"/\" + documentId)")
+  @Mapping(target = "id", expression = "java(parentFolder + \"/\" + documentId + \"/\" + fileName)")
   @Mapping(target = "title", source = "fileName")
-  FileDto toDto(String parentFolder, String fileName, GetObjectResponse file);
+  FileDto toDto(String parentFolder, Long documentId, String fileName, GetObjectResponse file);
 
   @Named("offsetDateTimeToString")
   default String offsetDateTimeToString(OffsetDateTime offsetDateTime) {

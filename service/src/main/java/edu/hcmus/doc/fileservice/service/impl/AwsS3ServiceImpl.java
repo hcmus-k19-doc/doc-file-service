@@ -24,6 +24,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -55,7 +56,7 @@ public class AwsS3ServiceImpl implements AwsS3Service {
   }
 
   @Override
-  public ByteArrayResource downloadFilesByParentFolderAndFolderName(
+  public ByteArrayResource zipFilesByParentFolderAndFolderName(
       ParentFolderEnum parentFolder,
       String folderName) throws IOException {
 
@@ -140,6 +141,17 @@ public class AwsS3ServiceImpl implements AwsS3Service {
     s3Client.putObject(objectRequest, RequestBody.fromByteBuffer(ByteBuffer.wrap(file.getData())));
 
     return getFile(key);
+  }
+
+  @Override
+  public ResponseInputStream<GetObjectResponse> getFile(
+      ParentFolderEnum parentFolder, String folderName, String fileName) {
+    GetObjectRequest objectRequest = GetObjectRequest.builder()
+        .key(StringUtils.join(List.of(parentFolder, folderName, fileName), "/"))
+        .bucket(s3BucketName)
+        .build();
+
+    return s3Client.getObject(objectRequest);
   }
 
   public GetObjectResponse getFile(String key) {

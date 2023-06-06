@@ -10,7 +10,6 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,8 @@ public class QueueService {
 
       fileDtos.add(fileMapper.toDto(
           attachmentPostDto.getParentFolder().value,
-          attachmentPostDto.getDocId().toString(),
+          attachmentPostDto.getDocId(),
+          fileWrapper.getFileName(),
           fileFromS3)
       );
     }

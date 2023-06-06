@@ -27,9 +27,6 @@ public class RabbitMQConfiguration {
   @Value("${spring.rabbitmq.template.attachment-queue}")
   private String attachmentQueue;
 
-  @Value("${spring.rabbitmq.template.s3-attachment-queue}")
-  private String s3AttachmentQueue;
-
   @Value("${spring.rabbitmq.template.exchange}")
   private String exchange;
 
@@ -59,11 +56,6 @@ public class RabbitMQConfiguration {
   }
 
   @Bean
-  Queue s3AttachmentQueue() {
-    return new Queue(s3AttachmentQueue, true);
-  }
-
-  @Bean
   Exchange docExchange() {
     return ExchangeBuilder.directExchange(exchange).durable(true).build();
   }
@@ -81,15 +73,6 @@ public class RabbitMQConfiguration {
   Binding attachmentBinding() {
     return BindingBuilder
         .bind(attachmentQueue())
-        .to(docExchange())
-        .with(attachmentRoutingKey)
-        .noargs();
-  }
-
-  @Bean
-  Binding s3AttachmentBinding() {
-    return BindingBuilder
-        .bind(s3AttachmentQueue())
         .to(docExchange())
         .with(attachmentRoutingKey)
         .noargs();

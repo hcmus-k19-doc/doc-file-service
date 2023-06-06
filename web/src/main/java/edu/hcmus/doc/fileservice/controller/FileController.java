@@ -1,5 +1,7 @@
 package edu.hcmus.doc.fileservice.controller;
 
+import static edu.hcmus.doc.fileservice.util.mapper.decorator.FileMapperDecorator.MIME_TYPE_KEY;
+
 import edu.hcmus.doc.fileservice.DocURL;
 import edu.hcmus.doc.fileservice.model.dto.AttachmentDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 @RequiredArgsConstructor
 @RestController
@@ -71,11 +75,29 @@ public class FileController {
   }
 
   @SneakyThrows
+  @GetMapping("/s3/{parentFolder}/{folderName}/{fileName}")
+  public ResponseEntity<byte[]> getFileFromS3(
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName,
+      @PathVariable String fileName) {
+    ResponseInputStream<GetObjectResponse> responseResponseInputStream = awsS3Service.getFile(parentFolder, folderName, fileName);
+    GetObjectResponse response = responseResponseInputStream.response();
+
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_TYPE, response.metadata().get(MIME_TYPE_KEY));
+    headers.add(HttpHeaders.CONTENT_LENGTH, response.contentLength().toString());
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(responseResponseInputStream.readAllBytes());
+  }
+
+  @SneakyThrows
   @GetMapping("/s3/{parentFolder}/{folderName}")
-  public ResponseEntity<ByteArrayResource> downloadFileFromS3(
+  public ResponseEntity<ByteArrayResource> downloadZipFileFromS3(
       @PathVariable ParentFolderEnum parentFolder,
       @PathVariable String folderName) {
-    ByteArrayResource resource = awsS3Service.downloadFilesByParentFolderAndFolderName(parentFolder, folderName);
+    ByteArrayResource resource = awsS3Service.zipFilesByParentFolderAndFolderName(parentFolder, folderName);
     String zipName = StringUtils.join(
         List.of(parentFolder, folderName, "attachments.zip"),
         "_"

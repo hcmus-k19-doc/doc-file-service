@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 public abstract class FileMapperDecorator implements FileMapper {
 
   private static final String DATE_KEY = "Date";
-  private static final String MIME_TYPE_KEY = "mime-type";
+  public static final String MIME_TYPE_KEY = "mime-type";
 
   @Autowired
   @Qualifier("delegate")
@@ -26,8 +26,8 @@ public abstract class FileMapperDecorator implements FileMapper {
   }
 
   @Override
-  public FileDto toDto(String parentFolder, String fileName, GetObjectResponse file) {
-    FileDto dto = delegate.toDto(parentFolder, fileName, file);
+  public FileDto toDto(String parentFolder, Long documentId, String fileName, GetObjectResponse file) {
+    FileDto dto = delegate.toDto(parentFolder, documentId, fileName, file);
     dto.setCreatedDate(file.metadata().get(DATE_KEY));
     dto.setModifiedDate(file.lastModified().toString());
     dto.setSize(file.contentLength());
