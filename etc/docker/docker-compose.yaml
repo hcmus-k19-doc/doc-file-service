@@ -1,77 +1,48 @@
-# This docker-compose file will spin up an ACS cluster on a local host.
-# It requires a minimum of 13GB Memory to distribute among containers.
-#
-# For performance tuning, assign the container memory and give a percentage of
-# it to the JVM. Use either the -Xms,-Xmx flags or the newly added flags in
-# java 10+: -XX:MaxRAMPercentage and -XX:MinRAMPercentage.
-# More details here:
-# https://www.oracle.com/technetwork/java/javase/10-relnote-issues-4108729.html
-#
-# Note: The docker-compose file from github.com is a limited trial that goes
-# into read-only mode after 2 days. Get the latest docker-compose.yml file with
-# a 30-day trial license by accessing the Alfresco Content Services trial
-# download page at:
-# https://www.alfresco.com/platform/content-services-ecm/trial/download
-#
-# Using version 2 as 3 does not support resource constraint options
-# (cpu_*, mem_* limits) for non swarm mode in Compose
----
-version: "2"
+version: '3.7'
 services:
-  alfresco:
-    image: docker.io/alfresco/alfresco-content-repository-community:7.4.0-M2
-    mem_limit: 1900m
+
+  doc-file-service:
+    profiles:
+      - local-deployment
+    container_name: doc-file-service
+    image: hcmusdoc/doc-file-service:latest
+    build:
+      context: ../../
+      dockerfile: Dockerfile
     ports:
-      - "8181:8080"
+      - "8081:8081"
     environment:
-      JAVA_TOOL_OPTIONS: >-
-        -Dencryption.keystore.type=JCEKS
-        -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
-        -Dencryption.keyAlgorithm=DESede
-        -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
-        -Dmetadata-keystore.password=mp6yc0UD9e
-        -Dmetadata-keystore.aliases=metadata
-        -Dmetadata-keystore.metadata.password=oKIWzVdEdA
-        -Dmetadata-keystore.metadata.algorithm=DESede
-      JAVA_OPTS: >-
-        -Ddb.driver=org.postgresql.Driver -Ddb.username=alfresco
-        -Ddb.password=alfresco -Ddb.url=jdbc:postgresql://postgres:5432/alfresco
-        -Dsolr.host=solr6 -Dsolr.port=8983 -Dsolr.http.connection.timeout=1000
-        -Dsolr.secureComms=secret -Dsolr.sharedSecret=secret
-        -Dsolr.base.url=/solr -Dindex.subsystem.name=solr6
-        -Dshare.host=127.0.0.1 -Dshare.port=8182 -Dalfresco.host=localhost
-        -Dalfresco.port=8181 -Dcsrf.filter.enabled=false
-        -Daos.baseUrlOverwrite=http://localhost:8181/alfresco/aos
-        -Dmessaging.broker.url="failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true"
-        -Ddeployment.method=DOCKER_COMPOSE
-        -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
-        -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
-  postgres:
-    image: postgres:14.4
-    mem_limit: 512m
-    environment:
-      - POSTGRES_PASSWORD=alfresco
-      - POSTGRES_USER=alfresco
-      - POSTGRES_DB=alfresco
-    command: postgres -c max_connections=300 -c log_min_messages=LOG
-    ports:
-      - "5433:5432"
-  solr6:
-    image: alfresco/alfresco-search-services:2.0.5
-    mem_limit: 2g
-    environment:
-      # Solr needs to know how to register itself with Alfresco
-      SOLR_ALFRESCO_HOST: "alfresco"
-      SOLR_ALFRESCO_PORT: "8080"
-      # Alfresco needs to know how to call solr
-      SOLR_SOLR_HOST: "solr6"
-      SOLR_SOLR_PORT: "8983"
-      # Create the default alfresco and archive cores
-      SOLR_CREATE_ALFRESCO_DEFAULTS: "alfresco,archive"
-      # HTTPS or SECRET
-      ALFRESCO_SECURE_COMMS: "secret"
-      # SHARED SECRET VALUE
-      JAVA_TOOL_OPTIONS: >-
-        -Dalfresco.secureComms.secret=secret
-    ports:
-      - "8083:8983" # Browser port
+      DOC_MAIN_SERVICE_SPRING_PROFILES_ACTIVE: local-deployment
+      DOC_FILE_SERVICE_SERVER_PORT: 8081
+      DOC_FILE_SERVICE_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://host.docker.internal:8180/realms/doc-realm
+      DOC_MAIN_SERVICE_DATASOURCE_URL: jdbc:postgresql://18.138.129.181:5432/alfresco
+      ALFRESCO_DB_HOST: 18.138.129.181
+      ALFRESCO_DATABASE: alfresco
+      DOC_FILE_SERVICE_DATASOURCE_USERNAME: alfresco
+      DOC_FILE_SERVICE_DATASOURCE_PASSWORD: alfresco
+      DOC_FILE_SERVICE_BROKER_URL: tcp://18.138.129.181:61616
+      DOC_FILE_SERVICE_ELASTICSEARCH_URIS: localhost:9200
+      DOC_FILE_SERVICE_ELASTICSEARCH_USERNAME: elastic
+      DOC_FILE_SERVICE_ELASTICSEARCH_PASSWORD: changeme
+      DOC_FILE_SERVICE_RABBITMQ_HOST: 13.215.56.216
+      DOC_FILE_SERVICE_RABBITMQ_PORT: 5672
+      DOC_FILE_SERVICE_RABBITMQ_USERNAME: guest
+      DOC_FILE_SERVICE_RABBITMQ_PASSWORD: guest
+      DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_EXCHANGE: doc.exchange
+      DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_ROUTING_KEY: doc.routingkey
+      DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_DEFAULT_RECEIVE_QUEUE: doc.doc-main-queue
+      DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_ATTACHMENT_QUEUE: doc.attachment-queue
+      DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_ATTACHMENT_ROUTING_KEY: doc.attachment-routing-key
+      DOC_FILE_SERVICE_CONTENT_SERVICE_SECURITY_BASICAUTH_USERNAME: admin
+      DOC_FILE_SERVICE_CONTENT_SERVICE_SECURITY_BASICAUTH_PASSWORD: admin
+      DOC_FILE_SERVICE_CONTENT_SERVICE_URL: http://18.138.129.181:8181
+      DOC_FILE_SERVICE_CONTENT_SERVICE_PATH: /alfresco/api/-default-/public/alfresco/versions/1
+      DOC_FILE_SERVICE_CONTENT_SERVICE_SEARCH_PATH: /alfresco/api/-default-/public/search/versions/1
+      DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_ID: hcmus-k19-doc
+      DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_TITLE: HCMUS-K19-DOC
+      DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_DESCRIPTION: HCMUS-K19-DOC
+      DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_VISIBILITY: PRIVATE
+      DOC_FILE_SERVICE_AWS_S3_ACCESS_KEY: AKIAS6FDZNZSRE6D6YZB
+      DOC_FILE_SERVICE_AWS_S3_SECRET_KEY: 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
+      DOC_FILE_SERVICE_AWS_S3_REGION: ap-southeast-1
+      DOC_FILE_SERVICE_AWS_S3_BUCKET_NAME: prj-doc-attachments
