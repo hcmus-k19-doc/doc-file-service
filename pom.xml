@@ -125,6 +125,8 @@
         </configuration>
       </plugin>
     </plugins>
+
+    <finalName>doc-file-service</finalName>
   </build>
 
 </project>
