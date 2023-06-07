@@ -1,0 +1,81 @@
+server:
+  port: ${DOC_FILE_SERVICE_SERVER_PORT}
+
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${DOC_FILE_SERVICE_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+  servlet:
+    multipart:
+      max-file-size: 3000KB # max file size for each request
+      max-request-size: 3000KB # max request size for a multipart/form-data.
+
+  datasource:
+    url: jdbc:postgresql://${ALFRESCO_DB_HOST}:5432/${ALFRESCO_DATABASE}
+    username: ${DOC_FILE_SERVICE_DATASOURCE_USERNAME}
+    password: ${DOC_FILE_SERVICE_DATASOURCE_PASSWORD}
+
+  jms:
+    cache:
+      enabled: false
+
+  activemq:
+    broker-url: ${DOC_FILE_SERVICE_BROKER_URL}
+
+  elasticsearch:
+    uris: ${DOC_FILE_SERVICE_ELASTICSEARCH_URIS}
+    username: ${DOC_FILE_SERVICE_ELASTICSEARCH_USERNAME}
+    password: ${DOC_FILE_SERVICE_ELASTICSEARCH_PASSWORD}
+    connection-timeout: 1s
+
+  rabbitmq:
+    host: ${DOC_FILE_SERVICE_RABBITMQ_HOST}
+    port: ${DOC_FILE_SERVICE_RABBITMQ_PORT}
+    username: ${DOC_FILE_SERVICE_RABBITMQ_USERNAME}
+    password: ${DOC_FILE_SERVICE_RABBITMQ_PASSWORD}
+    template:
+      exchange: ${DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_EXCHANGE}
+      routing-key: ${DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_ROUTING_KEY}
+      default-receive-queue: ${DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_DEFAULT_RECEIVE_QUEUE}
+      attachment-queue: ${DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_ATTACHMENT_QUEUE}
+      attachment-routing-key: ${DOC_FILE_SERVICE_RABBITMQ_TEMPLATE_ATTACHMENT_ROUTING_KEY}
+
+
+logging:
+  level:
+    web: debug
+
+# HTTP Basic Authentication that will be used by the API
+content:
+  service:
+    security:
+      basicAuth:
+        username: ${DOC_FILE_SERVICE_CONTENT_SERVICE_SECURITY_BASICAUTH_USERNAME}
+        password: ${DOC_FILE_SERVICE_CONTENT_SERVICE_SECURITY_BASICAUTH_PASSWORD}
+    # Location of the server and API endpoints
+    url: ${DOC_FILE_SERVICE_CONTENT_SERVICE_URL}
+    path: ${DOC_FILE_SERVICE_CONTENT_SERVICE_PATH}
+    search:
+      path: ${DOC_FILE_SERVICE_CONTENT_SERVICE_SEARCH_PATH}
+
+alfresco:
+  default:
+    siteId: ${DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_ID}
+    siteTitle: ${DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_TITLE}
+    siteDescription: ${DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_DESCRIPTION}
+    siteVisibility: ${DOC_FILE_SERVICE_ALFRESCO_DEFAULT_SITE_VISIBILITY}
+
+aws:
+  s3:
+    access-key: ${DOC_FILE_SERVICE_AWS_S3_ACCESS_KEY}
+    secret-key: ${DOC_FILE_SERVICE_AWS_S3_SECRET_KEY}
+    region: ${DOC_FILE_SERVICE_AWS_S3_REGION}
+    bucket-name: ${DOC_FILE_SERVICE_AWS_S3_BUCKET_NAME}
