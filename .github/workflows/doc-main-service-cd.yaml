@@ -24,6 +24,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17.0.5'
 
+      - name: Test
+        run: mvn test
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
