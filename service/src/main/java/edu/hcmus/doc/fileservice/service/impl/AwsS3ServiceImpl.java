@@ -4,6 +4,7 @@ import static edu.hcmus.doc.fileservice.model.enums.FileType.ALLOWED_FILE_TYPES;
 
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
+import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
 import edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.AwsS3Service;
@@ -40,6 +41,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 public class AwsS3ServiceImpl implements AwsS3Service {
 
   private static final String MIME_TYPE = "MIME-Type";
+  private static final String DELIMITER = "/";
 
   @Value("${aws.s3.bucket-name}")
   private String s3BucketName;
@@ -61,19 +63,24 @@ public class AwsS3ServiceImpl implements AwsS3Service {
       String folderName) throws IOException {
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    String prefix = StringUtils.join(List.of(parentFolder, folderName), "/");
+    String prefix = StringUtils.join(List.of(parentFolder, folderName), DELIMITER) + DELIMITER;
 
     try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
       ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
           .bucket(s3BucketName)
           .prefix(prefix)
+          .delimiter(DELIMITER)
           .build();
       List<S3Object> contents = s3Client.listObjectsV2(listObjectsV2Request).contents();
       List<String> fileKeys = contents
           .stream()
           .map(S3Object::key)
-          .filter(key -> !key.equals(prefix + "/"))
+          .filter(key -> !key.equals(prefix + DELIMITER))
           .toList();
+
+      if (CollectionUtils.isEmpty(fileKeys)) {
+        throw new AttachmentNoContentException(AttachmentNoContentException.ATTACHMENT_NO_CONTENT);
+      }
 
       fileKeys.forEach(k -> {
         GetObjectRequest objectRequest = GetObjectRequest
