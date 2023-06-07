@@ -19,7 +19,10 @@
     <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
     <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     <typescript-generator.version>3.1.1185</typescript-generator.version>
-    <typescript-generator.outputFile>target/models.ts</typescript-generator.outputFile>
+    <typescript-generator.outputFile>../../doc-front/src/models/doc-file-models.ts</typescript-generator.outputFile>
+
+    <!--    Flags   -->
+    <skipTypescriptGenerator>false</skipTypescriptGenerator>
   </properties>
 
   <dependencies>
@@ -87,7 +90,7 @@
         <configuration>
           <jsonLibrary>jackson2</jsonLibrary>
           <classPatterns>
-            <classPattern>edu.hcmus.doc.model.dto.*</classPattern>
+            <classPattern>edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum</classPattern>
           </classPatterns>
           <excludeClasses>
             <class>java.io.Serializable</class>
@@ -96,10 +99,9 @@
           <outputKind>module</outputKind>
           <outputFileType>implementationFile</outputFileType>
           <outputFile>${typescript-generator.outputFile}</outputFile>
-          <skip>true</skip>
+          <skip>${skipTypescriptGenerator}</skip>
         </configuration>
       </plugin>
     </plugins>
   </build>
-
 </project>

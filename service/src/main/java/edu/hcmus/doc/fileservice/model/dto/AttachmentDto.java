@@ -1,4 +1,4 @@
-package edu.hcmus.doc.fileservice.model.dto.Attachment;
+package edu.hcmus.doc.fileservice.model.dto;
 
 import edu.hcmus.doc.fileservice.model.enums.FileType;
 import lombok.Data;

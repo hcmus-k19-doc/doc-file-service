@@ -15,7 +15,7 @@ public class FileDto {
   private String modifiedDate;
   private String creator;
   private String modifier;
-  private Double size;
+  private Long size;
   private String mimeType;
   private String url;
   private byte[] data;

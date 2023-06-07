@@ -1,16 +1,21 @@
 package edu.hcmus.doc.fileservice.controller;
 
+import static edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException.FILE_TOO_LARGE;
+import static edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException.INTERNAL_SERVER_ERROR;
+
 import edu.hcmus.doc.fileservice.model.dto.ExceptionDto;
 import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.model.exception.ResourceAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+@Slf4j
 @RestControllerAdvice
 public class ExceptionController {
 
@@ -18,7 +23,7 @@ public class ExceptionController {
   public ResponseEntity<ExceptionDto> handleFileTypeNotAcceptedException(
       FileTypeNotAcceptedException exception) {
     return ResponseEntity
-        .status(HttpStatus.EXPECTATION_FAILED)
+        .status(HttpStatus.BAD_REQUEST)
         .body(new ExceptionDto(exception.getMessage()));
   }
 
@@ -47,17 +52,17 @@ public class ExceptionController {
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException.class)
-  public ResponseEntity<ExceptionDto> handleMaxSizeException(
-      MaxUploadSizeExceededException exception) {
+  public ResponseEntity<ExceptionDto> handleMaxSizeException() {
     return ResponseEntity
-        .status(HttpStatus.EXPECTATION_FAILED)
-        .body(new ExceptionDto("FILE.FILE_TOO_LARGE"));
+        .status(HttpStatus.BAD_REQUEST)
+        .body(new ExceptionDto(FILE_TOO_LARGE));
   }
 
   @ExceptionHandler(Throwable.class)
   public ResponseEntity<ExceptionDto> handleInternalErrorException(Throwable throwable) {
+    log.error(throwable.getMessage());
     return ResponseEntity
         .internalServerError()
-        .body(new ExceptionDto("INTERNAL_SERVER_ERROR"));
+        .body(new ExceptionDto(INTERNAL_SERVER_ERROR));
   }
 }
