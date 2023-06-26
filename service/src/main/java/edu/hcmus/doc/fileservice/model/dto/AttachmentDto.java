@@ -10,4 +10,5 @@ public class AttachmentDto {
   private String alfrescoFileId;
   private String alfrescoFolderId;
   private FileType fileType;
+  private String fileName;
 }
