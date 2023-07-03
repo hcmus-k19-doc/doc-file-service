@@ -21,4 +21,6 @@ public interface AwsS3Service {
   GetObjectResponse uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) throws IOException;
 
   ResponseInputStream<GetObjectResponse> getFile(ParentFolderEnum parentFolder, String folderName, String fileName);
+
+  byte[] getFileBytesFromS3Key(String fileKey);
 }

@@ -34,6 +34,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
+
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(rollbackFor = Throwable.class)
@@ -168,5 +169,21 @@ public class AwsS3ServiceImpl implements AwsS3Service {
         .build();
 
     return s3Client.getObject(objectRequest).response();
+  }
+
+  @Override
+  public byte[] getFileBytesFromS3Key(String fileKey) {
+    // check if this key exists in s3
+    GetObjectRequest objectRequest = GetObjectRequest.builder()
+        .key(fileKey)
+        .bucket(s3BucketName)
+        .build();
+
+    try {
+      return s3Client.getObject(objectRequest).readAllBytes();
+    } catch (Exception e) {
+      log.error("Error when getting file from server");
+      throw new AttachmentNoContentException(AttachmentNoContentException.ATTACHMENT_NO_CONTENT);
+    }
   }
 }
