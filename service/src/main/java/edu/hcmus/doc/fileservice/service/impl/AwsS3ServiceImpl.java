@@ -172,7 +172,7 @@ public class AwsS3ServiceImpl implements AwsS3Service {
   }
 
   @Override
-  public byte[] getFileBytesFromS3Key(String fileKey) {
+  public ResponseInputStream<GetObjectResponse> getFileFromS3Key(String fileKey) {
     // check if this key exists in s3
     GetObjectRequest objectRequest = GetObjectRequest.builder()
         .key(fileKey)
@@ -180,7 +180,7 @@ public class AwsS3ServiceImpl implements AwsS3Service {
         .build();
 
     try {
-      return s3Client.getObject(objectRequest).readAllBytes();
+      return s3Client.getObject(objectRequest);
     } catch (Exception e) {
       log.error("Error when getting file from server");
       throw new AttachmentNoContentException(AttachmentNoContentException.ATTACHMENT_NO_CONTENT);

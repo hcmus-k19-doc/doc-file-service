@@ -121,4 +121,18 @@ public class FileController {
       @RequestParam MultipartFile file) {
     awsS3Service.uploadFile(parentFolder, folderName, file);
   }
+
+  @SneakyThrows
+  @GetMapping("/get-byte-array-from-s3-key")
+  public ResponseEntity<byte[]> getFileUrlFromS3Key(@RequestParam("fileKey") String fileKey) {
+    ResponseInputStream<GetObjectResponse> responseResponseInputStream = awsS3Service.getFileFromS3Key(fileKey);
+    GetObjectResponse response = responseResponseInputStream.response();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_TYPE, response.metadata().get(MIME_TYPE_KEY));
+    headers.add(HttpHeaders.CONTENT_LENGTH, response.contentLength().toString());
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(responseResponseInputStream.readAllBytes());
+  }
 }

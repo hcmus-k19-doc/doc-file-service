@@ -22,5 +22,5 @@ public interface AwsS3Service {
 
   ResponseInputStream<GetObjectResponse> getFile(ParentFolderEnum parentFolder, String folderName, String fileName);
 
-  byte[] getFileBytesFromS3Key(String fileKey);
+  ResponseInputStream<GetObjectResponse> getFileFromS3Key(String fileKey);
 }
