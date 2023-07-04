@@ -6,8 +6,8 @@ import edu.hcmus.doc.fileservice.DocURL;
 import edu.hcmus.doc.fileservice.model.dto.AttachmentDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
-import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.service.AwsS3Service;
+import edu.hcmus.doc.fileservice.service.FileService;
 import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -120,5 +120,19 @@ public class FileController {
       @PathVariable String folderName,
       @RequestParam MultipartFile file) {
     awsS3Service.uploadFile(parentFolder, folderName, file);
+  }
+
+  @SneakyThrows
+  @GetMapping("/get-byte-array-from-s3-key")
+  public ResponseEntity<byte[]> getFileUrlFromS3Key(@RequestParam("fileKey") String fileKey) {
+    ResponseInputStream<GetObjectResponse> responseResponseInputStream = awsS3Service.getFileFromS3Key(fileKey);
+    GetObjectResponse response = responseResponseInputStream.response();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_TYPE, response.metadata().get(MIME_TYPE_KEY));
+    headers.add(HttpHeaders.CONTENT_LENGTH, response.contentLength().toString());
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(responseResponseInputStream.readAllBytes());
   }
 }
