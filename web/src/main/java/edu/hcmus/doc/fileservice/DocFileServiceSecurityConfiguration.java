@@ -1,4 +1,4 @@
-package edu.hcmus.doc.fileservice.security.config;
+package edu.hcmus.doc.fileservice;
 
 import static java.util.Arrays.asList;
 
@@ -19,7 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class DocFileServiceSecurityConfiguration {
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
     http.cors()
         .and()
         .csrf()
@@ -29,8 +29,7 @@ public class DocFileServiceSecurityConfiguration {
         .and()
         .authorizeRequests()
         .anyRequest()
-//        .authenticated()
-        .permitAll()
+        .authenticated()
         .and()
         .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 

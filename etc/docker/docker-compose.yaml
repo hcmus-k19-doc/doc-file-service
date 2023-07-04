@@ -1,11 +1,11 @@
 version: '3.7'
 services:
-
   doc-file-service:
     profiles:
       - local-deployment
     container_name: doc-file-service
     image: hcmusdoc/doc-file-service:latest
+    restart: always
     build:
       context: ../../
       dockerfile: Dockerfile
