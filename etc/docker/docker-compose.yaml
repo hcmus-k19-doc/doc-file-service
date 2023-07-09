@@ -6,9 +6,6 @@ services:
     container_name: doc-file-service
     image: hcmusdoc/doc-file-service:latest
     restart: always
-    build:
-      context: ../../
-      dockerfile: Dockerfile
     ports:
       - "8081:8081"
     environment:
