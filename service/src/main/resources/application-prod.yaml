@@ -51,8 +51,7 @@ spring:
 
 logging:
   level:
-    web: info
-    sql: info
+    web: debug
 
 # HTTP Basic Authentication that will be used by the API
 content:
