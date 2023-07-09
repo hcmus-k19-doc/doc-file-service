@@ -46,3 +46,4 @@ services:
       DOC_FILE_SERVICE_AWS_S3_SECRET_KEY: ppAQ1EFGcHZ84yS55yQ/XLb/oykBkdSox5aGbywD
       DOC_FILE_SERVICE_AWS_S3_REGION: ap-southeast-1
       DOC_FILE_SERVICE_AWS_S3_BUCKET_NAME: prj-doc-attachments
+      TZ: Asia/Ho_Chi_Minh
