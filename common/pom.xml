@@ -6,7 +6,7 @@
   <parent>
     <groupId>edu.hcmus.doc.file-service</groupId>
     <artifactId>doc-file-service-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${prj-doc.doc-file-service.version}</version>
   </parent>
 
   <artifactId>doc-file-service-common</artifactId>

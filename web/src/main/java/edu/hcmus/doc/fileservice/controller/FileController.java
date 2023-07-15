@@ -2,7 +2,7 @@ package edu.hcmus.doc.fileservice.controller;
 
 import static edu.hcmus.doc.fileservice.util.mapper.decorator.FileMapperDecorator.MIME_TYPE_KEY;
 
-import edu.hcmus.doc.fileservice.DocURL;
+import edu.hcmus.doc.fileservice.DocFileServiceURL;
 import edu.hcmus.doc.fileservice.model.dto.AttachmentDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
@@ -33,7 +33,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(DocURL.API_V1 + "/files")
+@RequestMapping(DocFileServiceURL.API_V1 + "/files")
 public class FileController {
 
   private final FileService fileService;

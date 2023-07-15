@@ -28,6 +28,8 @@ public class DocFileServiceSecurityConfiguration {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
+        .antMatchers("/actuator/**")
+        .permitAll()
         .anyRequest()
         .authenticated()
         .and()

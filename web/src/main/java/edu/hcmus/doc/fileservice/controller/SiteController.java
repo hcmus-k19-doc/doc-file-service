@@ -1,6 +1,6 @@
 package edu.hcmus.doc.fileservice.controller;
 
-import edu.hcmus.doc.fileservice.DocURL;
+import edu.hcmus.doc.fileservice.DocFileServiceURL;
 import edu.hcmus.doc.fileservice.model.dto.SiteDto;
 import edu.hcmus.doc.fileservice.service.SiteService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(DocURL.API_V1 + "/sites")
+@RequestMapping(DocFileServiceURL.API_V1 + "/sites")
 public class SiteController {
   private final SiteService siteService;
 

@@ -1,8 +1,8 @@
 package edu.hcmus.doc.fileservice;
 
-public class DocURL {
+public class DocFileServiceURL {
 
-  private DocURL() {
+  private DocFileServiceURL() {
   }
 
   public static final String API_V1 = "/api/v1";
