@@ -5,6 +5,7 @@ services:
       - local-deployment
     container_name: doc-file-service
     image: hcmusdoc/doc-file-service:latest
+    pull_policy: always
     restart: always
     ports:
       - "8081:8081"
