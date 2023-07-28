@@ -16,6 +16,8 @@ public interface AwsS3Service {
 
   ByteArrayResource zipFilesByParentFolderAndFolderName(ParentFolderEnum parentFolder, String fileName) throws IOException;
 
+  ByteArrayResource zipFilesByParentFolderAndFolderNameIgnoreDeleted(ParentFolderEnum parentFolder, String folderName , List<String> fileNameList) throws IOException;
+
   void uploadFile(ParentFolderEnum parentFolder, String folderName, MultipartFile file) throws IOException;
 
   GetObjectResponse uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) throws IOException;
