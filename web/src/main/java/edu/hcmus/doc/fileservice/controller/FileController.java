@@ -113,6 +113,27 @@ public class FileController {
   }
 
   @SneakyThrows
+  @PostMapping("/s3/download/{parentFolder}/{folderName}")
+  public ResponseEntity<ByteArrayResource> downloadZipFileFromS3IgnoreDeleted(
+      @RequestBody List<String> fileNameList,
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName) {
+    ByteArrayResource resource = awsS3Service.zipFilesByParentFolderAndFolderNameIgnoreDeleted(parentFolder, folderName, fileNameList);
+    String zipName = StringUtils.join(
+        List.of(parentFolder, folderName, "attachments.zip"),
+        "_"
+    );
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipName);
+    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(resource.contentLength()));
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(resource);
+  }
+
+  @SneakyThrows
   @PostMapping(value = "/s3/{parentFolder}/{folderName}")
   @ResponseStatus(HttpStatus.CREATED)
   public void uploadFileToS3(

@@ -43,11 +43,9 @@ public class AwsS3ServiceImpl implements AwsS3Service {
 
   private static final String MIME_TYPE = "MIME-Type";
   private static final String DELIMITER = "/";
-
+  private final S3Client s3Client;
   @Value("${aws.s3.bucket-name}")
   private String s3BucketName;
-
-  private final S3Client s3Client;
 
   @Override
   public List<S3Object> getFiles() {
@@ -104,6 +102,50 @@ public class AwsS3ServiceImpl implements AwsS3Service {
   }
 
   @Override
+  public ByteArrayResource zipFilesByParentFolderAndFolderNameIgnoreDeleted(
+      ParentFolderEnum parentFolder, String folderName, List<String> fileNameList)
+      throws IOException {
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    String prefix = StringUtils.join(List.of(parentFolder, folderName), DELIMITER) + DELIMITER;
+
+    try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
+      ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
+          .bucket(s3BucketName)
+          .prefix(prefix)
+          .delimiter(DELIMITER)
+          .build();
+      List<S3Object> contents = s3Client.listObjectsV2(listObjectsV2Request).contents();
+      List<String> fileKeys = contents
+          .stream()
+          .map(S3Object::key)
+          .filter(key -> fileNameList.contains(key.substring(key.lastIndexOf("/") + 1)))
+          .toList();
+
+      if (CollectionUtils.isEmpty(fileKeys)) {
+        throw new AttachmentNoContentException(AttachmentNoContentException.ATTACHMENT_NO_CONTENT);
+      }
+
+      fileKeys.forEach(k -> {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(k)
+            .bucket(s3BucketName)
+            .build();
+
+        try {
+          ZipEntry zipEntry = new ZipEntry(k);
+          zipOutputStream.putNextEntry(zipEntry);
+          zipOutputStream.write(s3Client.getObject(objectRequest).readAllBytes());
+        } catch (IOException e) {
+          throw new DocFileServiceRuntimeException("Error when zip file", e);
+        }
+      });
+    }
+
+    return new ByteArrayResource(byteArrayOutputStream.toByteArray());
+  }
+
+  @Override
   public void uploadFile(
       ParentFolderEnum parentFolder,
       String folderName,
@@ -132,7 +174,8 @@ public class AwsS3ServiceImpl implements AwsS3Service {
   }
 
   @Override
-  public GetObjectResponse uploadFile(ParentFolderEnum parentFolder, String folderName, FileWrapper file) {
+  public GetObjectResponse uploadFile(ParentFolderEnum parentFolder, String folderName,
+      FileWrapper file) {
     if (!CollectionUtils.containsAny(ALLOWED_FILE_TYPES, file.getContentType())) {
       throw new FileTypeNotAcceptedException(FileTypeNotAcceptedException.FILE_TYPE_NOT_ACCEPTED);
     }
