@@ -1,5 +1,6 @@
 package edu.hcmus.doc.fileservice.service.impl;
 
+import static edu.hcmus.doc.fileservice.DocFileServiceConst.DELIMITER;
 import static edu.hcmus.doc.fileservice.model.enums.FileType.ALLOWED_FILE_TYPES;
 
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
@@ -8,6 +9,7 @@ import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
 import edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.service.AwsS3Service;
+import edu.hcmus.doc.fileservice.service.ObjectStorageService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,19 +44,11 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 public class AwsS3ServiceImpl implements AwsS3Service {
 
   private static final String MIME_TYPE = "MIME-Type";
-  private static final String DELIMITER = "/";
-  private final S3Client s3Client;
+
   @Value("${aws.s3.bucket-name}")
   private String s3BucketName;
 
-  @Override
-  public List<S3Object> getFiles() {
-    ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
-        .bucket(s3BucketName)
-        .build();
-
-    return s3Client.listObjectsV2(listObjectsV2Request).contents();
-  }
+  private final S3Client s3Client;
 
   @Override
   public ByteArrayResource zipFilesByParentFolderAndFolderName(
@@ -205,6 +199,7 @@ public class AwsS3ServiceImpl implements AwsS3Service {
     return s3Client.getObject(objectRequest);
   }
 
+  @Override
   public GetObjectResponse getFile(String key) {
     GetObjectRequest objectRequest = GetObjectRequest.builder()
         .key(key)

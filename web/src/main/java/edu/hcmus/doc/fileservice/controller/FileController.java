@@ -1,14 +1,15 @@
 package edu.hcmus.doc.fileservice.controller;
 
+import static edu.hcmus.doc.fileservice.util.mapper.decorator.FileMapperDecorator.CONTENT_LENGTH_KEY;
+import static edu.hcmus.doc.fileservice.util.mapper.decorator.FileMapperDecorator.CONTENT_TYPE_KEY;
 import static edu.hcmus.doc.fileservice.util.mapper.decorator.FileMapperDecorator.MIME_TYPE_KEY;
 
 import edu.hcmus.doc.fileservice.DocFileServiceURL;
 import edu.hcmus.doc.fileservice.model.dto.AttachmentDto;
-import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
 import edu.hcmus.doc.fileservice.service.AwsS3Service;
 import edu.hcmus.doc.fileservice.service.FileService;
-import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
+import edu.hcmus.doc.fileservice.service.MinioService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -38,7 +39,7 @@ public class FileController {
 
   private final FileService fileService;
   private final AwsS3Service awsS3Service;
-  private final FileMapper fileMapper;
+  private final MinioService minioService;
 
   @GetMapping
   public List<String> getFiles() {
@@ -67,11 +68,6 @@ public class FileController {
     return ResponseEntity.ok()
         .headers(headers)
         .body(resource);
-  }
-
-  @GetMapping("/s3")
-  public List<FileDto> getFilesFromS3() {
-    return awsS3Service.getFiles().stream().map(fileMapper::toDto).toList();
   }
 
   @SneakyThrows
@@ -155,5 +151,51 @@ public class FileController {
     return ResponseEntity.ok()
         .headers(headers)
         .body(responseResponseInputStream.readAllBytes());
+  }
+
+  @SneakyThrows
+  @GetMapping("/minio/{parentFolder}/{folderName}")
+  public ResponseEntity<ByteArrayResource> downloadZipFileFromMinio(
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName) {
+    ByteArrayResource resource = minioService.zipFilesByParentFolderAndFolderName(parentFolder, folderName);
+    String zipName = StringUtils.join(
+        List.of(parentFolder, folderName, "attachments.zip"),
+        "_"
+    );
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipName);
+    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(resource.contentLength()));
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(resource);
+  }
+
+  @SneakyThrows
+  @PostMapping(value = "/minio/{parentFolder}/{folderName}")
+  @ResponseStatus(HttpStatus.CREATED)
+  public void uploadFileToMinio(
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName,
+      @RequestParam MultipartFile file) {
+    minioService.uploadFile(parentFolder, folderName, file);
+  }
+
+  @SneakyThrows
+  @GetMapping("/minio/{parentFolder}/{folderName}/{fileName}")
+  public ResponseEntity<byte[]> getFileFromMinio(
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName,
+      @PathVariable String fileName) {
+    io.minio.GetObjectResponse minioObjectResponse = minioService.getFile(StringUtils.join(List.of(parentFolder, folderName, fileName), "/"));
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_TYPE, minioObjectResponse.headers().get(CONTENT_TYPE_KEY));
+    headers.add(HttpHeaders.CONTENT_LENGTH, minioObjectResponse.headers().get(CONTENT_LENGTH_KEY));
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(minioObjectResponse.readAllBytes());
   }
 }
