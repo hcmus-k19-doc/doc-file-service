@@ -198,4 +198,38 @@ public class FileController {
         .headers(headers)
         .body(minioObjectResponse.readAllBytes());
   }
+
+  @SneakyThrows
+  @PostMapping("/minio/download/{parentFolder}/{folderName}")
+  public ResponseEntity<ByteArrayResource> downloadZipFileFromMinioIgnoreDeleted(
+      @RequestBody List<String> fileNameList,
+      @PathVariable ParentFolderEnum parentFolder,
+      @PathVariable String folderName) {
+    ByteArrayResource resource = minioService.zipFilesByParentFolderAndFolderNameIgnoreDeleted(parentFolder, folderName, fileNameList);
+    String zipName = StringUtils.join(
+        List.of(parentFolder, folderName, "attachments.zip"),
+        "_"
+    );
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipName);
+    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(resource.contentLength()));
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(resource);
+  }
+
+  @SneakyThrows
+  @GetMapping("/minio/files")
+  public ResponseEntity<byte[]> getFileContentFromMinio(@RequestParam String fileKey) {
+    io.minio.GetObjectResponse minioObjectResponse = minioService.getFile(fileKey);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_TYPE, minioObjectResponse.headers().get(CONTENT_TYPE_KEY));
+    headers.add(HttpHeaders.CONTENT_LENGTH, minioObjectResponse.headers().get(CONTENT_LENGTH_KEY));
+    return ResponseEntity.ok()
+        .headers(headers)
+        .body(minioObjectResponse.readAllBytes());
+  }
 }
