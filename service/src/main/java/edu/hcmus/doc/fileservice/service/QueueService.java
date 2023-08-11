@@ -31,8 +31,8 @@ public class QueueService {
   @RabbitListener(queues = "${spring.rabbitmq.template.attachment-queue}")
   public List<FileDto> saveAttachmentsToS3(@Valid AttachmentPostDto attachmentPostDto) {
     log.info("Received message from doc-main-service");
-    log.info("Save attachment to s3 is being processed");
-    log.info("Document ID: {}", attachmentPostDto.getDocId());
+    log.info("{}: Save attachment is processing...", minioService.getClass());
+    log.info("Document type: {}. Document ID: {}", attachmentPostDto.getParentFolder(), attachmentPostDto.getDocId());
 
     List<FileDto> fileDtos = new ArrayList<>();
     for (FileWrapper fileWrapper : attachmentPostDto.getAttachments()) {
