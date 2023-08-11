@@ -2,13 +2,13 @@ package edu.hcmus.doc.fileservice.util.mapper;
 
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.util.mapper.decorator.FileMapperDecorator;
+import io.minio.GetObjectResponse;
 import java.time.OffsetDateTime;
 import org.alfresco.core.model.Node;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Mapper(componentModel = "spring")

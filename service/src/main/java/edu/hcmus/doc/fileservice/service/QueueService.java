@@ -4,16 +4,18 @@ import edu.hcmus.doc.fileservice.model.dto.AttachmentPostDto;
 import edu.hcmus.doc.fileservice.model.dto.FileDto;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import edu.hcmus.doc.fileservice.util.mapper.FileMapper;
+import io.minio.GetObjectResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,19 +23,20 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 @Service
 public class QueueService {
 
-  private final AwsS3Service awsS3Service;
+  private final MinioService minioService;
 
   private final FileMapper fileMapper;
 
+  @SneakyThrows
   @RabbitListener(queues = "${spring.rabbitmq.template.attachment-queue}")
-  public List<FileDto> saveAttachmentsToS3(@Valid AttachmentPostDto attachmentPostDto) throws IOException {
+  public List<FileDto> saveAttachmentsToS3(@Valid AttachmentPostDto attachmentPostDto) {
     log.info("Received message from doc-main-service");
-    log.info("Save attachment to s3 is being processed");
-    log.info("Document ID: {}", attachmentPostDto.getDocId());
+    log.info("{}: Save attachment is processing...", minioService.getClass());
+    log.info("Document type: {}. Document ID: {}", attachmentPostDto.getParentFolder(), attachmentPostDto.getDocId());
 
     List<FileDto> fileDtos = new ArrayList<>();
     for (FileWrapper fileWrapper : attachmentPostDto.getAttachments()) {
-      GetObjectResponse fileFromS3 = awsS3Service.uploadFile(
+      GetObjectResponse fileFromMinio = minioService.uploadFile(
             attachmentPostDto.getParentFolder(),
             attachmentPostDto.getDocId().toString(),
             fileWrapper);
@@ -42,7 +45,7 @@ public class QueueService {
           attachmentPostDto.getParentFolder().value,
           attachmentPostDto.getDocId(),
           fileWrapper.getFileName(),
-          fileFromS3)
+          fileFromMinio)
       );
     }
 

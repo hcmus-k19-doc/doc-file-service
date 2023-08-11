@@ -31,7 +31,7 @@ public class DocFileServiceSecurityConfiguration {
         .antMatchers("/actuator/**")
         .permitAll()
         .anyRequest()
-        .authenticated()
+        .permitAll()
         .and()
         .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 

@@ -70,3 +70,12 @@ alfresco:
     siteTitle: HCMUS-K19-DOC
     siteDescription: HCMUS-K19-DOC
     siteVisibility: PRIVATE
+
+minio:
+  url: http://host.docker.internal:9000
+  access:
+    key: BONlv1QPzcVqTwCYqo38
+    secret: 6QFApdfd8Py3kYT9mF04GpAXhSGsmDz5bU5uK2JL
+  folder: /
+  bucket:
+    name: prj-doc
