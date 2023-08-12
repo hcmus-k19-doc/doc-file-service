@@ -76,6 +76,5 @@ minio:
   access:
     key: BONlv1QPzcVqTwCYqo38
     secret: 6QFApdfd8Py3kYT9mF04GpAXhSGsmDz5bU5uK2JL
-  folder: /
   bucket:
     name: prj-doc

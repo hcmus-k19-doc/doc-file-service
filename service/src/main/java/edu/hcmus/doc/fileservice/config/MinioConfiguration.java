@@ -17,12 +17,6 @@ public class MinioConfiguration {
   @Value("${minio.access.key}")
   private String accessKey;
 
-  @Value("${minio.folder}")
-  private String folder;
-
-  @Value("${minio.bucket.name}")
-  private String bucketName;
-
   @Bean
   public MinioClient generateMinioClient() {
     return MinioClient.builder()
