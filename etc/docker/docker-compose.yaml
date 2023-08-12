@@ -44,6 +44,10 @@ services:
       DOC_FILE_SERVICE_AWS_S3_SECRET_KEY: ppAQ1EFGcHZ84yS55yQ/XLb/oykBkdSox5aGbywD
       DOC_FILE_SERVICE_AWS_S3_REGION: ap-southeast-1
       DOC_FILE_SERVICE_AWS_S3_BUCKET_NAME: prj-doc-attachments
+      DOC_FILE_SERVICE_MINIO_URL: http://host.docker.internal:9000
+      DOC_FILE_SERVICE_MINIO_ACCESS_KEY: BONlv1QPzcVqTwCYqo38
+      DOC_FILE_SERVICE_MINIO_SECRET_KEY: 6QFApdfd8Py3kYT9mF04GpAXhSGsmDz5bU5uK2JL
+      DOC_FILE_SERVICE_MINIO_BUCKET_NAME: prj-doc
       TZ: Asia/Ho_Chi_Minh
 
   minio:
