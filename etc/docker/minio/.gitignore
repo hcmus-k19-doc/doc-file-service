@@ -1,0 +1,4 @@
+data/prj-doc/*
+!data/prj-doc/README.md
+data/.minio.sys/tmp/*
+data/.minio.sys/buckets/*

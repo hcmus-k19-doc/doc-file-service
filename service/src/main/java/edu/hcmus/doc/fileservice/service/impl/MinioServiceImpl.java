@@ -6,10 +6,8 @@ import static edu.hcmus.doc.fileservice.model.enums.FileType.ALLOWED_FILE_TYPES;
 import edu.hcmus.doc.fileservice.model.dto.FileWrapper;
 import edu.hcmus.doc.fileservice.model.enums.ParentFolderEnum;
 import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
-import edu.hcmus.doc.fileservice.model.exception.AttachmentNotFoundException;
 import edu.hcmus.doc.fileservice.model.exception.DocFileServiceRuntimeException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
-import edu.hcmus.doc.fileservice.model.exception.ResourceNotFoundException;
 import edu.hcmus.doc.fileservice.service.MinioService;
 import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;
@@ -26,7 +24,6 @@ import io.minio.errors.XmlParserException;
 import io.minio.messages.Item;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -43,7 +40,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -175,22 +171,13 @@ public class MinioServiceImpl implements MinioService {
 
   @Override
   public GetObjectResponse getFile(String key)
-      throws ServerException, InsufficientDataException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+      throws ServerException, InsufficientDataException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, ErrorResponseException {
     GetObjectArgs objectArgs = GetObjectArgs.builder()
         .bucket(minioBucketName)
         .object(key)
         .build();
 
-    GetObjectResponse response = null;
-    try {
-      response = minioClient.getObject(objectArgs);
-    } catch (ErrorResponseException e) {
-      if (e.response().code() == HttpStatus.NOT_FOUND.value()) {
-        throw new AttachmentNotFoundException("Attachment not found");
-      }
-    }
-
-    return response;
+    return minioClient.getObject(objectArgs);
   }
 
   @Override

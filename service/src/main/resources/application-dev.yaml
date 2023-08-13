@@ -74,7 +74,7 @@ alfresco:
 minio:
   url: http://host.docker.internal:9000
   access:
-    key: BONlv1QPzcVqTwCYqo38
-    secret: 6QFApdfd8Py3kYT9mF04GpAXhSGsmDz5bU5uK2JL
+    key: VykfpN2OTT6HYp9befvt
+    secret: HhBHZYp1x0wB3izhDYzkbXmQYhjfdIwxbi5Tguph
   bucket:
     name: prj-doc

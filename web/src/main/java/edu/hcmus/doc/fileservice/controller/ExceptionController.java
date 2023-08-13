@@ -8,6 +8,7 @@ import edu.hcmus.doc.fileservice.model.exception.AttachmentNoContentException;
 import edu.hcmus.doc.fileservice.model.exception.FileTypeNotAcceptedException;
 import edu.hcmus.doc.fileservice.model.exception.ResourceAlreadyExistedException;
 import edu.hcmus.doc.fileservice.model.exception.ResourceNotFoundException;
+import io.minio.errors.ErrorResponseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,9 +59,23 @@ public class ExceptionController {
         .body(new ExceptionDto(FILE_TOO_LARGE));
   }
 
+  @ExceptionHandler(ErrorResponseException.class)
+  public ResponseEntity<ExceptionDto> handleMinioErrorResponseException(ErrorResponseException exception) {
+    log.error(exception.getMessage(), exception);
+    if ("NoSuchKey".equals(exception.errorResponse().code())) {
+      return ResponseEntity
+          .status(HttpStatus.NOT_FOUND)
+          .body(new ExceptionDto("Attachment not found"));
+    }
+
+    return ResponseEntity
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new ExceptionDto(exception.getMessage()));
+  }
+
   @ExceptionHandler(Throwable.class)
   public ResponseEntity<ExceptionDto> handleInternalErrorException(Throwable throwable) {
-    log.error(throwable.getMessage());
+    log.error(throwable.getMessage(), throwable);
     return ResponseEntity
         .internalServerError()
         .body(new ExceptionDto(INTERNAL_SERVER_ERROR));
